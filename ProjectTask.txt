@@ -1,0 +1,275 @@
+Smart Campus Management System - Project Plan
+Project Overview
+A full-stack web application for managing college/school operations, including user management, courses, attendance, assignments, real-time chat, and analytics. Built with Angular (frontend), ASP.NET Core (backend), and deployed on Azure with CI/CD.
+Tech Stack
+
+Frontend: Angular 17+, Angular Material, Tailwind CSS, RxJS
+Backend: ASP.NET Core 8 Web API, Entity Framework Core, SignalR, JWT Auth
+Database: SQL Server (Azure SQL)
+Storage: Azure Blob Storage (file uploads)
+DevOps: Azure App Service, GitHub Actions/Azure DevOps, Docker (optional)
+Other: SMTP for email notifications
+
+Subtasks Breakdown
+Subtask 1: Project Setup & Environment Configuration
+Description: Set up the project structure, initialize repositories, and configure development tools.Deliverables:
+
+Git repository initialized
+Monorepo with Angular (ClientApp) and .NET (ServerApp) folders
+Basic README with setup instructions
+VS Code workspace with recommended extensionsSteps:
+
+
+Create a Git repository on GitHub.
+Set up a monorepo structure: /SmartCampus/ClientApp (Angular) and /SmartCampus/ServerApp (.NET).
+Initialize Angular project: ng new ClientApp --style=scss --routing=true.
+Initialize .NET project: dotnet new webapi -o ServerApp.
+Configure ESLint/Prettier for Angular and C# formatting rules for .NET.
+Write a README with setup instructions and tech stack overview.
+Install dependencies: Angular Material, Tailwind CSS, .NET packages (EF Core, SignalR).Estimated Time: 1-2 daysTools: VS Code, Git, Node.js, .NET SDK
+
+Subtask 2: Database Schema Design
+Description: Design the SQL Server database schema to support users, courses, attendance, assignments, and events.Deliverables:
+
+ERD (Entity-Relationship Diagram)
+SQL scripts for table creation
+EF Core models and DbContextSteps:
+
+
+Design entities:
+User (Id, Name, Email, Role, DepartmentId, PasswordHash)
+Department (Id, Name)
+Course (Id, Name, FacultyId, DepartmentId)
+Enrollment (StudentId, CourseId)
+Attendance (Id, StudentId, CourseId, Date, Status)
+Assignment (Id, CourseId, Title, Description, DueDate, FileUrl)
+Submission (Id, AssignmentId, StudentId, FileUrl, SubmissionDate, Grade)
+Message (Id, SenderId, ReceiverId, Content, Timestamp)
+Event (Id, CourseId, Title, Date, Description)
+
+
+Create an ERD using tools like Lucidchart or Draw.io.
+Write SQL scripts for table creation (SQL Scripts/ folder).
+In .NET, create EF Core models and configure DbContext in ServerApp/Models.
+Set up connection string for Azure SQL (local SQL Server for dev).Estimated Time: 3-4 daysTools: SQL Server Management Studio, Lucidchart/Draw.io, .NET CLI
+
+Subtask 3: Backend API Development - Authentication
+Description: Implement JWT-based authentication and role-based authorization.Deliverables:
+
+User registration/login endpoints
+JWT middleware for role-based access
+Role-based authorization for endpointsSteps:
+
+
+Install NuGet packages: Microsoft.AspNetCore.Authentication.JwtBearer, System.IdentityModel.Tokens.Jwt.
+Create AuthController with endpoints: POST /api/auth/register, POST /api/auth/login.
+Implement password hashing (BCrypt or ASP.NET Identity).
+Configure JWT in Program.cs (issuer, audience, secret key).
+Add role-based authorization attributes ([Authorize(Roles = "Admin")]).
+Create UserService for user management logic.
+Test endpoints using Postman.Estimated Time: 3-4 daysTools: Postman, .NET CLI
+
+Subtask 4: Backend API Development - Core Features
+Description: Build APIs for user management, courses, attendance, assignments, and events.Deliverables:
+
+RESTful APIs for CRUD operations
+EF Core integration for data access
+Service layer for business logicSteps:
+
+
+Create controllers: UsersController, CoursesController, AttendanceController, AssignmentsController, EventsController.
+Implement CRUD endpoints:
+Users: GET /api/users, POST /api/users, etc.
+Courses: GET /api/courses, POST /api/courses, etc.
+Attendance: POST /api/attendance, GET /api/attendance/course/{id}, etc.
+Assignments: POST /api/assignments, GET /api/assignments/course/{id}, etc.
+Events: POST /api/events, GET /api/events/course/{id}, etc.
+
+
+Create service classes (UserService, CourseService, etc.) in ServerApp/Services.
+Use EF Core for data operations in services.
+Add input validation using data annotations and FluentValidation.
+Test APIs with Postman.Estimated Time: 7-8 daysTools: Postman, .NET CLI
+
+Subtask 5: Backend - File Uploads with Azure Blob Storage
+Description: Enable file uploads for assignments and submissions using Azure Blob Storage.Deliverables:
+
+File upload/download endpoints
+Integration with Azure Blob StorageSteps:
+
+
+Create an Azure Blob Storage account and container.
+Install NuGet package: Azure.Storage.Blobs.
+Create FileService to handle uploads/downloads.
+Add endpoints in AssignmentsController and SubmissionsController:
+POST /api/assignments/{id}/upload (faculty uploads assignment)
+POST /api/submissions/{id}/upload (student submits file)
+GET /api/files/{fileName} (download file)
+
+
+Configure Azure Blob Storage connection string in appsettings.json.
+Test file uploads/downloads with Postman.Estimated Time: 3-4 daysTools: Azure Portal, Postman
+
+Subtask 6: Backend - Real-time Chat with SignalR
+Description: Implement real-time chat between students and faculty using SignalR.Deliverables:
+
+SignalR hub for messaging
+Endpoints for message history
+Broadcast announcementsSteps:
+
+
+Install NuGet package: Microsoft.AspNetCore.SignalR.
+Create ChatHub in ServerApp/SignalR.
+Implement methods: SendMessage, SendAnnouncement.
+Configure SignalR in Program.cs and map hub (/hub/chat).
+Create MessagesController for storing/retrieving message history.
+Test real-time messaging using SignalR client (Postman or custom client).Estimated Time: 4-5 daysTools: Postman, SignalR Client
+
+Subtask 7: Frontend - Angular Setup & Core UI
+Description: Set up Angular app with core UI components and navigation.Deliverables:
+
+Angular app with routing
+Shared components (header, sidebar, footer)
+Role-based dashboard layoutsSteps:
+
+
+Configure Angular routing in app-routing.module.ts:
+Routes: /login, /student/dashboard, /faculty/dashboard, /admin/dashboard
+
+
+Create shared components: HeaderComponent, SidebarComponent, FooterComponent.
+Set up Angular Material and Tailwind CSS.
+Create dashboard components for each role (StudentDashboardComponent, etc.).
+Implement role-based route guards (AuthGuard, RoleGuard).
+Test navigation and UI responsiveness.Estimated Time: 4-5 daysTools: Angular CLI, Chrome DevTools
+
+Subtask 8: Frontend - Feature Implementation
+Description: Build Angular components for core features (courses, attendance, assignments, events).Deliverables:
+
+Components for each feature
+Services for API integration
+Reactive forms for data inputSteps:
+
+
+Create components:
+CourseListComponent, CourseDetailsComponent
+AttendanceComponent, AttendanceReportComponent
+AssignmentListComponent, AssignmentSubmissionComponent
+EventCalendarComponent
+
+
+Create services (CourseService, AttendanceService, etc.) for API calls using HttpClient.
+Implement reactive forms for creating/editing courses, assignments, events.
+Use RxJS for async data handling (e.g., course list updates).
+Integrate with backend APIs and test functionality.Estimated Time: 8-10 daysTools: Angular CLI, Postman
+
+Subtask 9: Frontend - Real-time Chat UI
+Description: Build chat UI and integrate with SignalR for real-time messaging.Deliverables:
+
+Chat component with message input/display
+SignalR client integration
+Announcement displaySteps:
+
+
+Create ChatComponent with message input and display area.
+Install SignalR client: npm install @microsoft/signalr.
+Create ChatService to connect to ChatHub and handle messages.
+Implement real-time message rendering using RxJS observables.
+Add announcement banner for faculty broadcasts.
+Test chat functionality with multiple users.Estimated Time: 4-5 daysTools: Angular CLI, Chrome DevTools
+
+Subtask 10: Frontend - Admin Dashboard with Analytics
+Description: Build admin dashboard with charts for attendance, grades, and user activity.Deliverables:
+
+Admin dashboard component
+Charts using Chart.js
+API integration for analytics dataSteps:
+
+
+Create AdminDashboardComponent.
+Install Chart.js and ng2-charts: npm install chart.js ng2-charts.
+Create charts for:
+Attendance percentage by course
+Grade distribution
+Active users over time
+
+
+Create AnalyticsService to fetch data from backend APIs.
+Test chart rendering and data accuracy.Estimated Time: 4-5 daysTools: Angular CLI, Chart.js
+
+Subtask 11: Notifications (Email & Push)
+Description: Implement email notifications for assignments and push notifications for messages.Deliverables:
+
+Email notification service
+Push notification integrationSteps:
+
+
+Backend: Set up SMTP service (e.g., SendGrid) for emails.
+Create NotificationService in .NET to send emails for new assignments.
+Frontend: Implement push notifications using ServiceWorker and Push API.
+Create NotificationService in Angular to handle push subscriptions.
+Test email and push notifications.Estimated Time: 3-4 daysTools: SendGrid, Angular CLI
+
+Subtask 12: CI/CD & Azure Deployment
+Description: Set up CI/CD pipeline and deploy the app to Azure.Deliverables:
+
+GitHub Actions/Azure DevOps workflow
+Deployed app on Azure App Service
+Azure SQL databaseSteps:
+
+
+Create Azure App Service for frontend and backend.
+Set up Azure SQL database and update connection string.
+Create GitHub Actions workflow:
+Build Angular app (ng build --prod)
+Build .NET app (dotnet publish)
+Deploy to Azure App Service
+
+
+Configure environment variables (JWT secret, Blob Storage keys).
+Test deployment and app functionality.Estimated Time: 4-5 daysTools: Azure Portal, GitHub Actions
+
+Subtask 13: Testing & Documentation
+Description: Write unit tests, perform end-to-end testing, and document the project.Deliverables:
+
+Unit tests for backend and frontend
+End-to-end tests
+Updated README with screenshots and demo instructionsSteps:
+
+
+Backend: Write unit tests for services using xUnit.
+Frontend: Write unit tests for components/services using Jasmine/Karma.
+Perform end-to-end testing with Cypress or Protractor.
+Update README with project overview, setup, and deployment instructions.
+Add screenshots and a demo link (if hosted).Estimated Time: 4-5 daysTools: xUnit, Jasmine/Karma, Cypress
+
+Subtask 14: Optional Enhancements (if time permits)
+Description: Add optional features like dark mode, PWA, or WebRTC.Deliverables:
+
+Dark/light theme toggle
+PWA supportSteps:
+
+
+Implement dark/light theme using Tailwind CSS and local storage.
+Add PWA support with Angular: ng add @angular/pwa.
+Test PWA functionality (offline mode, installable app).Estimated Time: 2-3 daysTools: Angular CLI, Chrome DevTools
+
+Timeline (2 Months)
+
+Week 1: Subtasks 1-2 (Setup, Database)
+Week 2: Subtasks 3-4 (Auth, Core APIs)
+Week 3: Subtasks 5-6 (File Uploads, SignalR)
+Week 4: Subtasks 7-8 (Angular Setup, Features)
+Week 5: Subtasks 9-10 (Chat UI, Admin Dashboard)
+Week 6: Subtask 11 (Notifications)
+Week 7: Subtask 12 (CI/CD & Deployment)
+Week 8: Subtasks 13-14 (Testing, Documentation, Optional Enhancements)
+
+Notes
+
+Prioritize core features (auth, courses, assignments, chat) before optional enhancements.
+Test each subtask incrementally to catch issues early.
+Use Git for version control with meaningful commit messages.
+Document APIs using Swagger for backend.
+Keep the portfolio in mind: showcase clean code, scalability, and modern practices.
+

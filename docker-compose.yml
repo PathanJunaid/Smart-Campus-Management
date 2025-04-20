@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql_server_2022
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "Password@123"  # Make sure it meets MS SQL complexity rules
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"            # or "Developer", "Standard", etc.
+    volumes:
+      - sql_data:/var/opt/mssql       # Persistent data storage
+      - ./init:/docker-entrypoint-initdb.d  # Optional: place .sql files here to auto-run
+
+volumes:
+  sql_data:
