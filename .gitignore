@@ -1,45 +1,25 @@
-# .NET Core / ASP.NET Core
-/ServerApp/bin/
-/ServerApp/obj/
-/ServerApp/.vs/
-/ServerApp/*.csproj.user
-/ServerApp/appsettings.Development.json
-/ServerApp/wwwroot/
-
-# Angular
-/ClientApp/node_modules/
-/ClientApp/dist/
-/ClientApp/.angular/
-/ClientApp/.vscode/
-/ClientApp/coverage/
-/ClientApp/ngsw.json
-/ClientApp/ngsw-worker.js
-
-# Azure and Deployment
-azure-pipelines.yml
-*.azure
-*.azuredevops
-*.bicep
-*.tfstate
-*.tfstate.backup
-*.azure-pipelines/
-
-# Database
-*.mdf
-*.ldf
-*.sdf
-SQL Scripts/*.sql.bak
-
-# IDE and Editor Files
-.vscode/
-.idea/
-*.code-workspace
+# .NET Core
+**/bin/
+**/obj/
+**/.vs/
+*.csproj.user
 *.suo
-*.ntvs*
-*.njsproj
+*.user
+*.userosscache
 *.sln.docstates
 
-# Build and Test Artifacts
+# ASP.NET Secrets and Environment Files
+.env
+*.env.*
+*.secret
+*.key
+*.pem
+secrets.json
+appsettings.*.json
+!appsettings.json
+!appsettings.example.json
+
+# Logs and Coverage
 *.log
 *.trx
 *.coverage
@@ -47,20 +27,36 @@ SQL Scripts/*.sql.bak
 TestResults/
 coverage/
 
-# Dependency and Package Manager
-*.lock.json
-package-lock.json
-yarn.lock
+# Angular
+/ClientApp/node_modules/
+/ClientApp/dist/
+/ClientApp/.angular/
+/ClientApp/.vscode/
+/ClientApp/coverage/
+/ClientApp/ngsw*.js
+/ClientApp/.env
+/ClientApp/.eslintcache
 
-# Environment and Secrets
-.env
-*.env.*
-!.env.example
-*.secret
-*.pem
-*.key
-appsettings.*.json
-ClientApp/src/environments/environment.*.ts
+# Editor Files
+.vscode/
+.idea/
+*.code-workspace
+
+# Deployment and Infra
+*.azure
+*.bicep
+*.tfstate
+*.tfstate.backup
+*.dockerignore
+docker-compose.*.yml
+Dockerfile.user
+azure-pipelines.yml
+
+# Databases
+*.mdf
+*.ldf
+*.sdf
+SQL Scripts/*.sql.bak
 
 # Temporary Files
 *.tmp
@@ -70,23 +66,13 @@ ClientApp/src/environments/environment.*.ts
 .DS_Store
 Thumbs.db
 
-# Docker
-Dockerfile.user
-*.dockerignore
-docker-compose.*.yml
-
-# OS Generated Files
-[Dd]esktop.ini
-$RECYCLE.BIN/
-
-# Miscellaneous
-*.pidb
-*.userprefs
-*.sublime-project
-*.sublime-workspace
+# Misc
 node_modules/
 dist/
 out/
 build/
 temp/
 tmp/
+*.pidb
+*.sublime-project
+*.sublime-workspace

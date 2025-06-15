@@ -1,22 +1,26 @@
-﻿using Basic_Auth.Model;
-using Basic_Auth.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
+using Smart_Campus_Management.Services;
 using System.Text.Json.Serialization;
+using Smart_Campus_Management.Models;
+using Smart_Campus_Management.DTO;
+using Microsoft.AspNetCore.Identity;
+using Smart_Campus_Management.Interface;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Smart_Campus_Management;
+using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
 
+ExcelPackage.License.SetNonCommercialPersonal("Junaid Khan");
+
 // Retrieve JWT settings from configuration
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-// Database Configuration
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Database connection string 'DefaultConnection' is missing in configuration.");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<EmailService>();
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -58,7 +62,13 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
     });
-builder.Services.AddScoped<IUserService, UserServices>();
+
+//Db Services 
+builder.Services.AddScoped<IUserServices, UserServices>();
+builder.Services.AddSingleton<IEmailService, EmailService>();
+builder.Services.AddScoped<ILogServices, LogServices>();
+builder.Services.AddScoped<IDepartmentServices, DepartmentServices>();
+
 
 // Add Swagger with Bearer Support
 builder.Services.AddEndpointsApiExplorer();
@@ -90,6 +100,13 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+// Database Configuration
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Database connection string 'DefaultConnection' is missing in configuration.");
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
 
 var app = builder.Build();
 

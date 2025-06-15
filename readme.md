@@ -31,7 +31,7 @@ Visual Studio Code or Visual Studio 2022 (recommended)
 
 Setup Instructions
 1. Clone the Repository
-git clone https://github.com/<your-username>/SmartCampus.git
+git clone https://github.com/Smart-Campus-Management.git
 cd SmartCampus
 
 2. Backend Setup (ServerApp)
