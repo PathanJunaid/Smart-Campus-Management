@@ -42,7 +42,8 @@ namespace Smart_Campus_Management.Models
             public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
             
             public Departments? Department { get; set; }
+            public ICollection<Enrollment_Model> Enrollments { get; set; }
 
-        }
+    }
     }
 

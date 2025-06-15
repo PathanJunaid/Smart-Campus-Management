@@ -21,13 +21,15 @@ namespace Smart_Campus_Management.Services
         private readonly IConfiguration _Config;
         private readonly IEmailService _emailService;
         private readonly ILogServices _logServices;
+        private readonly IEnrollmentServices _enrollmentServices;
 
-        public UserServices(AppDbContext dbcontext, IConfiguration config, IEmailService emailService, ILogServices logServices)
+        public UserServices(AppDbContext dbcontext, IConfiguration config, IEmailService emailService, ILogServices logServices, IEnrollmentServices enrollmentServices)
         {
             this.dbcontext = dbcontext;
             this._Config = config;
             _emailService = emailService;
             _logServices = logServices;
+            _enrollmentServices = enrollmentServices;
         }
 
         public async Task<UploadResponseDTO> UploadStudentOrFaculty(UploadStudentorFacultyDTO UploadedData)
@@ -242,7 +244,7 @@ namespace Smart_Campus_Management.Services
                             if (user.RollNo.HasValue && await dbcontext.Users.AnyAsync(u => u.RollNo == user.RollNo))
                             {
                                 var error = $"Row {row}: RollNo {user.RollNo} already exists.";
-                                await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user));
+                                await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user.Email));
                                 response.Errors.Add(error);
                                 continue;
                             }
@@ -251,24 +253,40 @@ namespace Smart_Campus_Management.Services
                             if (user.EmployeeId.HasValue && await dbcontext.Users.AnyAsync(u => u.EmployeeId == user.EmployeeId))
                             {
                                 var error = $"Row {row}: EmployeeId {user.EmployeeId} already exists.";
-                                await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user));
+                                await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user.Email));
                                 response.Errors.Add(error);
                                 continue;
                             }
 
                             // Attempt to add user
+                            using var transaction = await dbcontext.Database.BeginTransactionAsync();
                             try
                             {
                                 await dbcontext.Users.AddAsync(user);
                                 await dbcontext.SaveChangesAsync();
+                                if (UploadedData.DepartmentId != null)
+                                {
+                                    AddEnrollmentDTO addEnrollmentDTO = new AddEnrollmentDTO
+                                    {
+                                        DepartmentId = (int)UploadedData.DepartmentId,
+                                        StudentId = user.Id,
+                                    };
+                                    var result = await _enrollmentServices.AddEnrollment(addEnrollmentDTO);
+                                    if (!result.Success)
+                                    {
+                                        throw new Exception(result.Message);
+                                    }
+                                }
+                                await transaction.CommitAsync();
                                 var success = $"Row {row}: User {user.Email} added successfully.";
-                                await _logServices.LogToDatabase("UserImport", "Success", success, JsonSerializer.Serialize(user));
+                                await _logServices.LogToDatabase("UserImport", "Success", success, JsonSerializer.Serialize(user.Email));
                                 response.Successes.Add(success);
                             }
                             catch (DbUpdateException ex)
                             {
+                                await transaction.RollbackAsync();
                                 var error = $"Row {row}: Failed to add user {user.Email}: {ex.InnerException?.Message ?? ex.Message}";
-                                await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user));
+                                await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user.Email));
                                 response.Errors.Add(error);
                                 dbcontext.ChangeTracker.Clear();
                             }

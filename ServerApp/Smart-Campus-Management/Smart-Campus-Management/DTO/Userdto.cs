@@ -9,7 +9,7 @@ namespace Smart_Campus_Management.DTO
     {
         public UserRole Role { get; set; }
         public IFormFile File { get; set; }
-
+        public int? DepartmentId { get; set; }
     }
     public class UploadResponseDTO
     {

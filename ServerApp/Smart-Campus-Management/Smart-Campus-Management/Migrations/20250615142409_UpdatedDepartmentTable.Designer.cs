@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Smart_Campus_Management;
 
@@ -11,9 +12,11 @@ using Smart_Campus_Management;
 namespace Smart_Campus_Management.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250615142409_UpdatedDepartmentTable")]
+    partial class UpdatedDepartmentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,38 +65,6 @@ namespace Smart_Campus_Management.Migrations
                     b.HasIndex("FacultyId");
 
                     b.ToTable("Departments");
-                });
-
-            modelBuilder.Entity("Smart_Campus_Management.Models.Enrollment_Model", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EnrollmentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DepartmentId");
-
-                    b.HasIndex("StudentId");
-
-                    b.ToTable("Enrollments");
                 });
 
             modelBuilder.Entity("Smart_Campus_Management.Models.Faculty_Model", b =>
@@ -256,35 +227,6 @@ namespace Smart_Campus_Management.Migrations
                         .IsRequired();
 
                     b.Navigation("Faculty");
-                });
-
-            modelBuilder.Entity("Smart_Campus_Management.Models.Enrollment_Model", b =>
-                {
-                    b.HasOne("Smart_Campus_Management.Models.Department_Model", "Departments")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Smart_Campus_Management.Models.User", "User")
-                        .WithMany("Enrollments")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Departments");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Smart_Campus_Management.Models.Department_Model", b =>
-                {
-                    b.Navigation("Enrollments");
-                });
-
-            modelBuilder.Entity("Smart_Campus_Management.Models.User", b =>
-                {
-                    b.Navigation("Enrollments");
                 });
 #pragma warning restore 612, 618
         }

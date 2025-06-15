@@ -27,70 +27,91 @@ tech_stack:
     - SMTP: Email notifications
 
 database_schema:
+  enums:
+    - name: UserRole
+      values: [Admin, Faculty, Student]
+    - name: Departments
+      values: [Engineering, Arts]
   entities:
     - name: Users
       fields:
         - Id: UNIQUEIDENTIFIER, PRIMARY KEY
-        - Name: NVARCHAR(100), NOT NULL
+        - RollNo: BIGINT, NULLABLE
+        - EmployeeId: INT, NULLABLE
+        - FirstName: NVARCHAR(100), NOT NULL
+        - MiddleName: NVARCHAR(100), NULLABLE
+        - LastName: NVARCHAR(100), NULLABLE
         - Email: NVARCHAR(100), UNIQUE, NOT NULL
-        - Role: NVARCHAR(20), NOT NULL (Admin, Faculty, Student)
-        - PasswordHash: NVARCHAR(256), NOT NULL
+        - Password: NVARCHAR(256), NULLABLE
+        - Active: BIT, NOT NULL, DEFAULT 1
+        - Role: NVARCHAR(20), NOT NULL (UserRole enum: Admin, Faculty, Student)
+        - ProfilePicture: NVARCHAR(500), NULLABLE
+        - MobileNumber: BIGINT, NULLABLE
+        - DOB: DATE, NULLABLE
+        - CreatedAt: DATETIME, NOT NULL, DEFAULT GETUTCDATE()
+        - UpdatedAt: DATETIME, NOT NULL, DEFAULT GETUTCDATE()
+        - Department: NVARCHAR(20), NULLABLE (Departments enum: Engineering, Arts)
     - name: Faculty
       fields:
-        - Id: UNIQUEIDENTIFIER, PRIMARY KEY
-        - Name: NVARCHAR(100), NOT NULL
+        - Id: INT, PRIMARY KEY, IDENTITY(1,1)
+        - FacultyName: NVARCHAR(100), NOT NULL
+        - FacultyDescription: NVARCHAR(500), NULLABLE
+        - IsActive: BIT, NOT NULL, DEFAULT 1
+        - CreatedAt: DATETIME, NOT NULL, DEFAULT GETUTCDATE()
+        - UpdatedAt: DATETIME, NULLABLE
       relationships:
         - One-to-many: Departments (via FacultyId)
     - name: Department
       fields:
-        - Id: UNIQUEIDENTIFIER, PRIMARY KEY
-        - Name: NVARCHAR(100), NOT NULL
-        - FacultyId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Faculty)
+        - Id: INT, PRIMARY KEY, IDENTITY(1,1)
+        - DepartmentName: NVARCHAR(100), NOT NULL
+        - DepartmentDescription: NVARCHAR(500), NULLABLE
+        - DepartmentStatus: BIT, NOT NULL, DEFAULT 1
+        - CreatedAt: DATETIME, NOT NULL, DEFAULT GETUTCDATE()
+        - UpdatedAt: DATETIME, NULLABLE
+        - FacultyId: INT, NOT NULL, FOREIGN KEY (Faculty)
       relationships:
-        - Many-to-many: Courses (via CourseDepartment)
+        - Many-to-one: Faculty (via FacultyId)
+        - One-to-many: Courses (via DepartmentId)
+        - One-to-many: Enrollments (via DepartmentId)
     - name: Course
       fields:
         - Id: UNIQUEIDENTIFIER, PRIMARY KEY
         - Name: NVARCHAR(100), NOT NULL
-        - Description: NVARCHAR(500)
+        - Description: NVARCHAR(500), NULLABLE
+        - DepartmentId: INT, NOT NULL, FOREIGN KEY (Department)
       relationships:
-        - Many-to-many: Departments (via CourseDepartment)
-    - name: CourseDepartment
-      fields:
-        - CourseId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Course)
-        - DepartmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Department)
-      primary_key: [CourseId, DepartmentId]
+        - Many-to-one: Department (via DepartmentId)
     - name: Enrollment
       fields:
         - StudentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Users)
-        - CourseId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Course)
-        - DepartmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Department)
-      primary_key: [StudentId, CourseId, DepartmentId]
+        - DepartmentId: INT, NOT NULL, FOREIGN KEY (Department)
+      primary_key: [StudentId, DepartmentId]
     - name: Attendance
       fields:
         - Id: UNIQUEIDENTIFIER, PRIMARY KEY
         - StudentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Users)
         - CourseId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Course)
-        - DepartmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Department)
+        - DepartmentId: INT, NOT NULL, FOREIGN KEY (Department)
         - Date: DATE, NOT NULL
         - Status: NVARCHAR(20), NOT NULL
     - name: Assignment
       fields:
         - Id: UNIQUEIDENTIFIER, PRIMARY KEY
         - CourseId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Course)
-        - DepartmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Department)
+        - DepartmentId: INT, NOT NULL, FOREIGN KEY (Department)
         - Title: NVARCHAR(200), NOT NULL
-        - Description: NVARCHAR(500)
+        - Description: NVARCHAR(500), NULLABLE
         - DueDate: DATETIME, NOT NULL
-        - FileUrl: NVARCHAR(500)
+        - FileUrl: NVARCHAR(500), NULLABLE
     - name: Submission
       fields:
         - Id: UNIQUEIDENTIFIER, PRIMARY KEY
         - AssignmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Assignment)
         - StudentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Users)
-        - FileUrl: NVARCHAR(500)
-        - SubmissionDate: DATETIME
-        - Grade: DECIMAL(5,2)
+        - FileUrl: NVARCHAR(500), NULLABLE
+        - SubmissionDate: DATETIME, NULLABLE
+        - Grade: DECIMAL(5,2), NULLABLE
     - name: Message
       fields:
         - Id: UNIQUEIDENTIFIER, PRIMARY KEY
@@ -102,10 +123,10 @@ database_schema:
       fields:
         - Id: UNIQUEIDENTIFIER, PRIMARY KEY
         - CourseId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Course)
-        - DepartmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Department)
+        - DepartmentId: INT, NOT NULL, FOREIGN KEY (Department)
         - Title: NVARCHAR(200), NOT NULL
         - Date: DATETIME, NOT NULL
-        - Description: NVARCHAR(500)
+        - Description: NVARCHAR(500), NULLABLE
   deliverables:
     - ERD: Entity-Relationship Diagram (Lucidchart/Draw.io)
     - SQL Scripts: Table creation scripts in SQL Scripts/ folder
@@ -121,7 +142,6 @@ database_schema:
     - SQL Server Management Studio
     - Lucidchart/Draw.io
     - .NET CLI
-
 subtasks:
   - id: 1
     name: Project Setup & Environment Configuration
