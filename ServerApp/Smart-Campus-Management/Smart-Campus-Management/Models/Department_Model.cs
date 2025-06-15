@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Smart_Campus_Management.Models
 {
@@ -8,11 +9,16 @@ namespace Smart_Campus_Management.Models
         [Key]
         public int Id { get; set; }
 
-        required
+        [Required(ErrorMessage = "Department name is required.")]
+        [StringLength(100, ErrorMessage = "Department name can't exceed 100 characters.")]
         public string DepartmentName { get; set; }
 
         public string DepartmentDescription { get; set; } = string.Empty;
         public bool DepartmentStatus { get; set;} = true;
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
+        [ForeignKey("Faculty")]
+        public int FacultyId { get; set; }
+        public Faculty_Model Faculty { get; set; }
     }
 }

@@ -17,40 +17,36 @@ namespace Smart_Campus_Management.Services
             _logServices = logServices;
         }
 
-        public async Task<Department_Model> AddDepartment(CreateDepartmentDTO model)
+        public async Task<Department_Model?> CreateDepartment(CreateDepartmentDTO model)
         {
             try
             {
-                Department_Model department = new Department_Model
+                // Optional: check if Faculty exists
+                var facultyExists = await _context.Faculty.AnyAsync(f => f.Id == model.FacultyId);
+                if (!facultyExists)
+                {
+                    throw new Exception("Faculty not found");
+                }
+
+                var department = new Department_Model
                 {
                     DepartmentName = model.DepartmentName,
-                    DepartmentDescription = model.DepartmentDescription
+                    DepartmentDescription = model.DepartmentDescription ?? "",
+                    DepartmentStatus = true,
+                    CreatedAt = DateTime.UtcNow,
+                    FacultyId = model.FacultyId
                 };
-                department.CreatedAt = DateTime.UtcNow;
-                _context.Departments.Add(department);
+
+                await _context.Departments.AddAsync(department);
                 await _context.SaveChangesAsync();
 
-                await _logServices.LogToDatabase("Department", "Success", $"Department '{model.DepartmentName}' created.", JsonSerializer.Serialize(model));
+                await _logServices.LogToDatabase("CreateDepartment", "Success", "Department Created", JsonSerializer.Serialize(department));
                 return department;
             }
             catch (Exception ex)
             {
-                await _logServices.LogToDatabase("Create", "Error", $"Error creating department: {ex.Message}", JsonSerializer.Serialize(model));
-                throw;
-            }
-        }
-
-        public async Task<Department_Model?> GetDepartmentById(int id)
-        {
-            try
-            {
-                var department = await _context.Departments.FindAsync(id);
-                return department;
-            }
-            catch (Exception ex)
-            {
-                await _logServices.LogToDatabase("GetById", "Error", $"Error fetching department ID {id}: {ex.Message}", "{}");
-                throw;
+                await _logServices.LogToDatabase("CreateDepartment", "Error", ex.Message, JsonSerializer.Serialize(model));
+                return null;
             }
         }
 
@@ -58,41 +54,60 @@ namespace Smart_Campus_Management.Services
         {
             try
             {
-                var departments = await _context.Departments.Where(d=> d.DepartmentStatus == true).ToListAsync();
-
-                return departments;
+                return await _context.Departments
+                    .Include(d => d.Faculty)
+                    .Where(d => d.DepartmentStatus)
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
-                await _logServices.LogToDatabase("GetAll", "Error", $"Error fetching all departments: {ex.Message}", "{}");
-                throw;
+                await _logServices.LogToDatabase("GetAllDepartments", "Error", ex.Message, "{}");
+                return new List<Department_Model>();
             }
         }
 
-        public async Task<Department_Model?> UpdateDepartment(int id, Department_Model model)
+        public async Task<Department_Model?> GetDepartmentById(int id)
+        {
+            try
+            {
+                return await _context.Departments
+                    .Include(d => d.Faculty)
+                    .FirstOrDefaultAsync(d => d.Id == id && d.DepartmentStatus);
+            }
+            catch (Exception ex)
+            {
+                await _logServices.LogToDatabase("GetDepartmentById", "Error", ex.Message, $"{{ \"Id\": {id} }}");
+                return null;
+            }
+        }
+
+        public async Task<Department_Model?> UpdateDepartment(int id, UpdateDepartmentDTO model)
         {
             try
             {
                 var department = await _context.Departments.FindAsync(id);
                 if (department == null)
                 {
-                    await _logServices.LogToDatabase("Update", "Error", $"Department with ID {id} not found.", "{}");
+                    await _logServices.LogToDatabase("UpdateDepartment", "Failed", "Department not found", $"{{ \"Id\": {id} }}");
                     return null;
                 }
 
                 department.DepartmentName = model.DepartmentName;
-                department.DepartmentDescription = model.DepartmentDescription;
+                department.DepartmentDescription = model.DepartmentDescription ?? "";
                 department.DepartmentStatus = model.DepartmentStatus;
+                department.FacultyId = model.FacultyId;
+                department.UpdatedAt = DateTime.UtcNow;
 
+                _context.Departments.Update(department);
                 await _context.SaveChangesAsync();
 
-                await _logServices.LogToDatabase("Update", "Success", $"Updated department with ID: {id}", JsonSerializer.Serialize(department));
+                await _logServices.LogToDatabase("UpdateDepartment", "Success", "Department Updated", JsonSerializer.Serialize(department));
                 return department;
             }
             catch (Exception ex)
             {
-                await _logServices.LogToDatabase("Update", "Error", $"Error updating department ID {id}: {ex.Message}", JsonSerializer.Serialize(model));
-                throw;
+                await _logServices.LogToDatabase("UpdateDepartment", "Error", ex.Message, JsonSerializer.Serialize(model));
+                return null;
             }
         }
 
@@ -103,19 +118,20 @@ namespace Smart_Campus_Management.Services
                 var department = await _context.Departments.FindAsync(id);
                 if (department == null)
                 {
-                    await _logServices.LogToDatabase("Delete", "Error", $"Department with ID {id} not found.", "{}");
+                    await _logServices.LogToDatabase("DeleteDepartment", "Failed", "Department not found", $"{{ \"Id\": {id} }}");
                     return false;
                 }
+
                 department.DepartmentStatus = false;
                 await _context.SaveChangesAsync();
 
-                await _logServices.LogToDatabase("Delete", "Success", $"Deleted department with ID: {id}", JsonSerializer.Serialize(department));
+                await _logServices.LogToDatabase("DeleteDepartment", "Success", "Department deactivated", $"{{ \"Id\": {id} }}");
                 return true;
             }
             catch (Exception ex)
             {
-                await _logServices.LogToDatabase("Delete", "Error", $"Error deleting department ID {id}: {ex.Message}", "{}");
-                throw;
+                await _logServices.LogToDatabase("DeleteDepartment", "Error", ex.Message, $"{{ \"Id\": {id} }}");
+                return false;
             }
         }
     }

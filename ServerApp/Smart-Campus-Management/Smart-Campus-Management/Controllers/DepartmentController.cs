@@ -17,6 +17,7 @@ namespace Smart_Campus_Management.Controllers
             _departmentServices = departmentServices;
         }
 
+        // ✅ CREATE - Admin Only
         [HttpPost("create")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateDepartment([FromBody] CreateDepartmentDTO model)
@@ -26,17 +27,18 @@ namespace Smart_Campus_Management.Controllers
 
             try
             {
-                var created = await _departmentServices.AddDepartment(model);
+                var created = await _departmentServices.CreateDepartment(model);
+                if (created == null)
+                    return NotFound(new {message = "Faculty not found!"});
                 return Ok(created);
             }
             catch (Exception ex)
             {
-
-                return StatusCode(500, new { message = "Failed to create department.", error = ex.Message });
+                return StatusCode(400, new { message = "Failed to create department.", error = ex.Message });
             }
         }
 
-        // ✅ READ ALL - Any Authenticated User
+        // ✅ READ ALL - Admin Only
         [HttpGet("all")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllDepartments()
@@ -52,8 +54,9 @@ namespace Smart_Campus_Management.Controllers
             }
         }
 
+        // ✅ READ BY ID - All Authenticated Users
         [HttpGet("{id}")]
-        [Authorize]
+        [Authorize] // Any authenticated role can access
         public async Task<IActionResult> GetDepartmentById(int id)
         {
             try
@@ -70,9 +73,10 @@ namespace Smart_Campus_Management.Controllers
             }
         }
 
+        // ✅ UPDATE - Admin Only
         [HttpPut("update/{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateDepartment(int id, [FromBody] Department_Model model)
+        public async Task<IActionResult> UpdateDepartment(int id, [FromBody] UpdateDepartmentDTO model)
         {
             try
             {
