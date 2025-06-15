@@ -68,6 +68,7 @@ builder.Services.AddScoped<IUserServices, UserServices>();
 builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddScoped<ILogServices, LogServices>();
 builder.Services.AddScoped<IDepartmentServices, DepartmentServices>();
+builder.Services.AddScoped<IFacultyServices, FacultyServices>();
 
 
 // Add Swagger with Bearer Support

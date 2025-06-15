@@ -1,0 +1,417 @@
+# Smart Campus Management System - Project Plan
+project:
+  name: Smart Campus Management System
+  overview: A full-stack web application for managing college/school operations, including user management, courses, attendance, assignments, real-time chat, and analytics.
+  deployment: Built with Angular (frontend), ASP.NET Core (backend), and deployed on Azure with CI/CD.
+
+tech_stack:
+  frontend:
+    - Angular: 17+
+    - Angular Material: UI components
+    - Tailwind CSS: Styling
+    - RxJS: Reactive programming
+  backend:
+    - ASP.NET Core: 8 Web API
+    - Entity Framework Core: ORM
+    - SignalR: Real-time chat
+    - JWT Auth: Authentication
+  database:
+    - SQL Server: Azure SQL
+  storage:
+    - Azure Blob Storage: File uploads
+  devops:
+    - Azure App Service: Hosting
+    - GitHub Actions/Azure DevOps: CI/CD
+    - Docker: Optional
+  other:
+    - SMTP: Email notifications
+
+database_schema:
+  entities:
+    - name: Users
+      fields:
+        - Id: UNIQUEIDENTIFIER, PRIMARY KEY
+        - Name: NVARCHAR(100), NOT NULL
+        - Email: NVARCHAR(100), UNIQUE, NOT NULL
+        - Role: NVARCHAR(20), NOT NULL (Admin, Faculty, Student)
+        - PasswordHash: NVARCHAR(256), NOT NULL
+    - name: Faculty
+      fields:
+        - Id: UNIQUEIDENTIFIER, PRIMARY KEY
+        - Name: NVARCHAR(100), NOT NULL
+      relationships:
+        - One-to-many: Departments (via FacultyId)
+    - name: Department
+      fields:
+        - Id: UNIQUEIDENTIFIER, PRIMARY KEY
+        - Name: NVARCHAR(100), NOT NULL
+        - FacultyId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Faculty)
+      relationships:
+        - Many-to-many: Courses (via CourseDepartment)
+    - name: Course
+      fields:
+        - Id: UNIQUEIDENTIFIER, PRIMARY KEY
+        - Name: NVARCHAR(100), NOT NULL
+        - Description: NVARCHAR(500)
+      relationships:
+        - Many-to-many: Departments (via CourseDepartment)
+    - name: CourseDepartment
+      fields:
+        - CourseId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Course)
+        - DepartmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Department)
+      primary_key: [CourseId, DepartmentId]
+    - name: Enrollment
+      fields:
+        - StudentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Users)
+        - CourseId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Course)
+        - DepartmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Department)
+      primary_key: [StudentId, CourseId, DepartmentId]
+    - name: Attendance
+      fields:
+        - Id: UNIQUEIDENTIFIER, PRIMARY KEY
+        - StudentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Users)
+        - CourseId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Course)
+        - DepartmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Department)
+        - Date: DATE, NOT NULL
+        - Status: NVARCHAR(20), NOT NULL
+    - name: Assignment
+      fields:
+        - Id: UNIQUEIDENTIFIER, PRIMARY KEY
+        - CourseId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Course)
+        - DepartmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Department)
+        - Title: NVARCHAR(200), NOT NULL
+        - Description: NVARCHAR(500)
+        - DueDate: DATETIME, NOT NULL
+        - FileUrl: NVARCHAR(500)
+    - name: Submission
+      fields:
+        - Id: UNIQUEIDENTIFIER, PRIMARY KEY
+        - AssignmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Assignment)
+        - StudentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Users)
+        - FileUrl: NVARCHAR(500)
+        - SubmissionDate: DATETIME
+        - Grade: DECIMAL(5,2)
+    - name: Message
+      fields:
+        - Id: UNIQUEIDENTIFIER, PRIMARY KEY
+        - SenderId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Users)
+        - ReceiverId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Users)
+        - Content: NVARCHAR(1000), NOT NULL
+        - Timestamp: DATETIME, NOT NULL
+    - name: Event
+      fields:
+        - Id: UNIQUEIDENTIFIER, PRIMARY KEY
+        - CourseId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Course)
+        - DepartmentId: UNIQUEIDENTIFIER, NOT NULL, FOREIGN KEY (Department)
+        - Title: NVARCHAR(200), NOT NULL
+        - Date: DATETIME, NOT NULL
+        - Description: NVARCHAR(500)
+  deliverables:
+    - ERD: Entity-Relationship Diagram (Lucidchart/Draw.io)
+    - SQL Scripts: Table creation scripts in SQL Scripts/ folder
+    - EF Core Models: Models and DbContext in ServerApp/Models
+  steps:
+    - Design entities with relationships (Users, Faculty, Department, Course, etc.)
+    - Create ERD using Lucidchart or Draw.io
+    - Write SQL scripts for table creation
+    - Implement EF Core models and configure DbContext
+    - Set up Azure SQL connection string (local SQL Server for dev)
+  estimated_time: 4-5 days
+  tools:
+    - SQL Server Management Studio
+    - Lucidchart/Draw.io
+    - .NET CLI
+
+subtasks:
+  - id: 1
+    name: Project Setup & Environment Configuration
+    description: Set up project structure, initialize repositories, and configure development tools.
+    deliverables:
+      - Git repository initialized
+      - Monorepo with Angular (ClientApp) and .NET (ServerApp) folders
+      - Basic README with setup instructions
+      - VS Code workspace with recommended extensions
+    steps:
+      - Create Git repository on GitHub
+      - Set up monorepo: /SmartCampus/ClientApp (Angular), /SmartCampus/ServerApp (.NET)
+      - Initialize Angular project: ng new ClientApp --style=scss --routing=true
+      - Initialize .NET project: dotnet new webapi -o ServerApp
+      - Configure ESLint/Prettier for Angular and C# formatting for .NET
+      - Write README with setup instructions and tech stack overview
+      - Install dependencies: Angular Material, Tailwind CSS, .NET packages (EF Core, SignalR)
+    estimated_time: 1-2 days
+    tools:
+      - VS Code
+      - Git
+      - Node.js
+      - .NET SDK
+  - id: 2
+    name: Database Schema Design
+    description: Already defined above in database_schema
+  - id: 3
+    name: Backend API Development - Authentication
+    description: Implement JWT-based authentication and role-based authorization.
+    deliverables:
+      - User registration/login endpoints
+      - JWT middleware for role-based access
+      - Role-based authorization for endpoints
+    steps:
+      - Install NuGet packages: Microsoft.AspNetCore.Authentication.JwtBearer, System.IdentityModel.Tokens.Jwt
+      - Create AuthController with endpoints: POST /api/auth/register, POST /api/auth/login
+      - Implement password hashing (BCrypt or ASP.NET Identity)
+      - Configure JWT in Program.cs (issuer, audience, secret key)
+      - Add role-based authorization attributes ([Authorize(Roles = "Admin")])
+      - Create UserService for user management logic
+      - Test endpoints using Postman
+    estimated_time: 3-4 days
+    tools:
+      - Postman
+      - .NET CLI
+  - id: 4
+    name: Backend API Development - Core Features
+    description: Build APIs for user management, faculties, departments, courses, attendance, assignments, and events.
+    deliverables:
+      - RESTful APIs for CRUD operations
+      - EF Core integration for data access
+      - Service layer for business logic
+    steps:
+      - Create controllers: UsersController, FacultiesController, DepartmentsController, CoursesController, AttendanceController, AssignmentsController, EventsController
+      - Implement CRUD endpoints:
+        - Users: GET /api/users, POST /api/users, etc.
+        - Faculties: GET /api/faculties, POST /api/faculties, etc.
+        - Departments: GET /api/departments, POST /api/departments, etc.
+        - Courses: GET /api/courses, POST /api/courses, POST /api/courses/{courseId}/departments, etc.
+        - Attendance: POST /api/attendance, GET /api/attendance/course/{id}, etc.
+        - Assignments: POST /api/assignments, GET /api/assignments/course/{id}, etc.
+        - Events: POST /api/events, GET /api/events/course/{id}, etc.
+      - Create service classes (UserService, FacultyService, CourseService, etc.) in ServerApp/Services
+      - Use EF Core for data operations in services
+      - Add input validation using data annotations and FluentValidation
+      - Test APIs with Postman
+    estimated_time: 8-10 days
+    tools:
+      - Postman
+      - .NET CLI
+  - id: 5
+    name: Backend - File Uploads with Azure Blob Storage
+    description: Enable file uploads for assignments and submissions using Azure Blob Storage.
+    deliverables:
+      - File upload/download endpoints
+      - Integration with Azure Blob Storage
+    steps:
+      - Create Azure Blob Storage account and container
+      - Install NuGet package: Azure.Storage.Blobs
+      - Create FileService to handle uploads/downloads
+      - Add endpoints in AssignmentsController and SubmissionsController:
+        - POST /api/assignments/{id}/upload
+        - POST /api/submissions/{id}/upload
+        - GET /api/files/{fileName}
+      - Configure Azure Blob Storage connection string in appsettings.json
+      - Test file uploads/downloads with Postman
+    estimated_time: 3-4 days
+    tools:
+      - Azure Portal
+      - Postman
+  - id: 6
+    name: Backend - Real-time Chat with SignalR
+    description: Implement real-time chat between students and faculty using SignalR.
+    deliverables:
+      - SignalR hub for messaging
+      - Endpoints for message history
+      - Broadcast announcements
+    steps:
+      - Install NuGet package: Microsoft.AspNetCore.SignalR
+      - Create ChatHub in ServerApp/SignalR
+      - Implement methods: SendMessage, SendAnnouncement
+      - Configure SignalR in Program.cs and map hub (/hub/chat)
+      - Create MessagesController for storing/retrieving message history
+      - Test real-time messaging using SignalR client
+    estimated_time: 4-5 days
+    tools:
+      - Postman
+      - SignalR Client
+  - id: 7
+    name: Frontend - Angular Setup & Core UI
+    description: Set up Angular app with core UI components and navigation.
+    deliverables:
+      - Angular app with routing
+      - Shared components (header, sidebar, footer)
+      - Role-based dashboard layouts
+    steps:
+      - Configure Angular routing in app-routing.module.ts:
+        - Routes: /login, /student/dashboard, /faculty/dashboard, /admin/dashboard
+      - Create shared components: HeaderComponent, SidebarComponent, FooterComponent
+      - Set up Angular Material and Tailwind CSS
+      - Create dashboard components for each role (StudentDashboardComponent, etc.)
+      - Implement role-based route guards (AuthGuard, RoleGuard)
+      - Test navigation and UI responsiveness
+    estimated_time: 5-6 days
+    tools:
+      - Angular CLI
+      - Chrome DevTools
+  - id: 8
+    name: Frontend - Feature Implementation
+    description: Build Angular components for core features (faculties, departments, courses, attendance, assignments, events).
+    deliverables:
+      - Components for each feature
+      - Services for API integration
+      - Reactive forms for data input
+    steps:
+      - Create components:
+        - FacultyListComponent, FacultyDetailsComponent
+        - DepartmentListComponent, DepartmentDetailsComponent
+        - CourseListComponent, CourseDetailsComponent
+        - AttendanceComponent, AttendanceReportComponent
+        - AssignmentListComponent, AssignmentSubmissionComponent
+        - EventCalendarComponent
+      - Create services (FacultyService, CourseService, AttendanceService, etc.) for API calls using HttpClient
+      - Implement reactive forms for creating/editing faculties, departments, courses, assignments, events
+      - Use RxJS for async data handling
+      - Integrate with backend APIs and test functionality
+    estimated_time: 10-12 days
+    tools:
+      - Angular CLI
+      - Postman
+  - id: 9
+    name: Frontend - Real-time Chat UI
+    description: Build chat UI and integrate with SignalR for real-time messaging.
+    deliverables:
+      - Chat component with message input/display
+      - SignalR client integration
+      - Announcement display
+    steps:
+      - Create ChatComponent with message input and display area
+      - Install SignalR client: npm install @microsoft/signalr
+      - Create ChatService to connect to ChatHub and handle messages
+      - Implement real-time message rendering using RxJS observables
+      - Add announcement banner for faculty broadcasts
+      - Test chat functionality with multiple users
+    estimated_time: 4-5 days
+    tools:
+      - Angular CLI
+      - Chrome DevTools
+  - id: 10
+    name: Frontend - Admin Dashboard with Analytics
+    description: Build admin dashboard with charts for attendance, grades, and user activity.
+    deliverables:
+      - Admin dashboard component
+      - Charts using Chart.js
+      - API integration for analytics data
+    steps:
+      - Create AdminDashboardComponent
+      - Install Chart.js and ng2-charts: npm install chart.js ng2-charts
+      - Create charts for:
+        - Attendance percentage by course/department
+        - Grade distribution
+        - Active users over time
+      - Create AnalyticsService to fetch data from backend APIs
+      - Test chart rendering and data accuracy
+    estimated_time: 5-6 days
+    tools:
+      - Angular CLI
+      - Chart.js
+  - id: 11
+    name: Notifications (Email & Push)
+    description: Implement email notifications for assignments and push notifications for messages.
+    deliverables:
+      - Email notification service
+      - Push notification integration
+    steps:
+      - Backend: Set up SMTP service (e.g., SendGrid) for emails
+      - Create NotificationService in .NET to send emails for new assignments
+      - Frontend: Implement push notifications using ServiceWorker and Push API
+      - Create NotificationService in Angular to handle push subscriptions
+      - Test email and push notifications
+    estimated_time: 3-4 days
+    tools:
+      - SendGrid
+      - Angular CLI
+  - id: 12
+    name: CI/CD & Azure Deployment
+    description: Set up CI/CD pipeline and deploy the app to Azure.
+    deliverables:
+      - GitHub Actions/Azure DevOps workflow
+      - Deployed app on Azure App Service
+      - Azure SQL database
+    steps:
+      - Create Azure App Service for frontend and backend
+      - Set up Azure SQL database and update connection string
+      - Create GitHub Actions workflow:
+        - Build Angular app (ng build --prod)
+        - Build .NET app (dotnet publish)
+        - Deploy to Azure App Service
+      - Configure environment variables (JWT secret, Blob Storage keys)
+      - Test deployment and app functionality
+    estimated_time: 4-5 days
+    tools:
+      - Azure Portal
+      - GitHub Actions
+  - id: 13
+    name: Testing & Documentation
+    description: Write unit tests, perform end-to-end testing, and document the project.
+    deliverables:
+      - Unit tests for backend and frontend
+      - End-to-end tests
+      - Updated README with screenshots and demo instructions
+    steps:
+      - Backend: Write unit tests for services using xUnit
+      - Frontend: Write unit tests for components/services using Jasmine/Karma
+      - Perform end-to-end testing with Cypress or Protractor
+      - Update README with project overview, setup, and deployment instructions
+      - Add screenshots and demo link (if hosted)
+    estimated_time: 5-6 days
+    tools:
+      - xUnit
+      - Jasmine/Karma
+      - Cypress
+  - id: 14
+    name: Optional Enhancements
+    description: Add optional features like dark mode, PWA, or WebRTC.
+    deliverables:
+      - Dark/light theme toggle
+      - PWA support
+    steps:
+      - Implement dark/light theme using Tailwind CSS and local storage
+      - Add PWA support with Angular: ng add @angular/pwa
+      - Test PWA functionality (offline mode, installable app)
+    estimated_time: 2-3 days
+    tools:
+      - Angular CLI
+      - Chrome DevTools
+
+timeline:
+  duration: 2.5 months
+  weeks:
+    - week: 1
+      subtasks: [1, 2]
+      estimated_time: 5 days
+    - week: 2-3
+      subtasks: [3, 4]
+      estimated_time: 10 days
+    - week: 3-4
+      subtasks: [5, 6]
+      estimated_time: 9 days
+    - week: 5-6
+      subtasks: [7, 8]
+      estimated_time: 14 days
+    - week: 7
+      subtasks: [9, 10]
+      estimated_time: 10 days
+    - week: 8
+      subtasks: [11]
+      estimated_time: 4 days
+    - week: 9
+      subtasks: [12]
+      estimated_time: 5 days
+    - week: 10
+      subtasks: [13, 14]
+      estimated_time: 8 days
+  total_estimated_time: 65-70 days
+
+notes:
+  - Prioritize core features (auth, faculty/department/course management, assignments, chat) before optional enhancements
+  - Test each subtask incrementally to catch issues early
+  - Use Git for version control with meaningful commit messages
+  - Document APIs using Swagger for backend
+  - Update README to include new schema and relationships
+  - Keep portfolio in mind: showcase clean code, scalability, and modern practices
