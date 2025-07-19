@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text;
-using System;
 using Smart_Campus_Management.Interface;
 using Smart_Campus_Management.Models;
 using Smart_Campus_Management.DTO;
@@ -10,8 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 using OfficeOpenXml;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using System.Net.Mail;
-using System.Net;
 
 namespace Smart_Campus_Management.Services
 {
