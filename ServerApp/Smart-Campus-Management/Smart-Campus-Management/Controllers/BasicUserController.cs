@@ -48,8 +48,6 @@ namespace Smart_Campus_Management.Controllers
             }
         }
 
-
-
         // Delete User
         [HttpDelete("{id}")]
         [Authorize]
@@ -210,8 +208,6 @@ namespace Smart_Campus_Management.Controllers
             {
                 return BadRequest(new { message = ex.Message, success = false });
             }
-
-
         }
 
 
