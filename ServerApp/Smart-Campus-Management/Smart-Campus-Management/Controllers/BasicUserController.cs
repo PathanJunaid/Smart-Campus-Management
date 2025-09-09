@@ -118,7 +118,7 @@ namespace Smart_Campus_Management.Controllers
         /// <response code="200">Login successful, returns user data and JWT token.</response>
         /// <response code="400">Invalid login data.</response>
         /// <response code="500">Server error during login.</response>
-        [HttpPost("/auth/login")]
+        [HttpPost("auth/login")]
         public async Task<ActionResult<LoginResponseDTO>> Login([FromBody] Logindto logindata)
         {
             try
@@ -192,7 +192,7 @@ namespace Smart_Campus_Management.Controllers
         /// <response code="200">File processed successfully, returns success and error lists.</response>
         /// <response code="400">Invalid or empty file.</response>
         /// <response code="401">Unauthorized access (non-admin user).</response>
-        [HttpPost("/user/upload")]
+        [HttpPost("user/upload")]
         public async Task<IActionResult> UploadStudentOrFaculty([FromForm] UploadStudentorFacultyDTO UploadedData)
         {
             try
