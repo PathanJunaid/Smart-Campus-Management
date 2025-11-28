@@ -4,7 +4,7 @@
     {
     }
     public class ServiceResponse<T>{
-        public bool Success { get; set; }
+        public bool Success { get; set; } = false;
         public string Message { get; set; }
         public T? data { get; set; }
 

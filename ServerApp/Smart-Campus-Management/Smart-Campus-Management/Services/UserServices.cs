@@ -354,22 +354,13 @@ namespace Smart_Campus_Management.Services
 
                 if (user == null)
                 {
-                    // Check which field(s) did not match
-                    var emailExists = await dbcontext.Users.AnyAsync(u => u.Email == signUpData.Email);
-
-                    if (!emailExists)
-                    {
-                        response.Errors.Add("No user found with the provided Email.");
-                    }else if (user.Password== null)
-                    {
-                        response.Errors.Add("Already Registered. Please Login");
-                    }
-                    response.Message = "User verification failed.";
+                    response.Errors.Add("No user found with the provided Email.");
+                    response.Message = "No user found with the provided Email.";
                     response.Success = false;
                     await _logServices.LogToDatabase("SignUpStep1", "Failure", response.Message, JsonSerializer.Serialize(signUpData));
                     return response;
                 }
-                if (user.Password != null)
+                if (user.Password != null && !signUpData.IsForgetPassword)
                 {
                     response.Errors.Add("Already Registered. Please Login");
                     response.Message = "Already Registered.";
@@ -404,12 +395,17 @@ namespace Smart_Campus_Management.Services
                     return response;
                 }
                 
-
                 // Send email with Email, Name, Password, and OTP
                 var userName = $"{user.FirstName} {user.LastName}".Trim();
-                var IsEmailSuccess = await SendSignUpEmail(signUpData.Email, userName, otp);
-
-
+                var IsEmailSuccess = string.Empty;
+                if (signUpData.IsForgetPassword)
+                {
+                    IsEmailSuccess = await SendForgetPasswordEmail(signUpData.Email, userName, otp);
+                }
+                else
+                {
+                    IsEmailSuccess = await SendSignUpEmail(signUpData.Email, userName, otp);
+                }
                 response.Message = IsEmailSuccess;
                 response.Success = true;
                 await _logServices.LogToDatabase("SignUpStep1", "Success", response.Message, JsonSerializer.Serialize(new { signUpData.Email }));
@@ -491,10 +487,17 @@ namespace Smart_Campus_Management.Services
                 // Delete OTP record
                 dbcontext.OtpRecords.Remove(otpRecord);
                 await dbcontext.SaveChangesAsync();
-
-                response.Message = "User signup completed successfully.";
+                if (signUpData.IsForgetPassword)
+                {
+                    response.Message = "Password Reset successfully.";
+                    await _logServices.LogToDatabase("ForgetPassword", "Success", response.Message, JsonSerializer.Serialize(new { signUpData.Email }));
+                }
+                else
+                {
+                    response.Message = "User signup completed successfully.";
+                    await _logServices.LogToDatabase("SignUpStep2", "Success", response.Message, JsonSerializer.Serialize(new { signUpData.Email}));
+                }
                 response.Success = true;
-                await _logServices.LogToDatabase("SignUpStep2", "Success", response.Message, JsonSerializer.Serialize(new { signUpData.Email}));
                 return response;
             }
             catch (Exception ex)
@@ -518,6 +521,36 @@ namespace Smart_Campus_Management.Services
             Please use the OTP to complete your signup within 10 minutes.
 
             Best regards, Smart Campus Management Team";
+
+            try
+            {
+                var IsEmailSuccess = await _emailService.SendEmailAsync(email, subject, body);
+                return IsEmailSuccess;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error sending welcome email: " + ex.Message);
+                return ex.Message;
+            }
+
+        }
+
+        private async Task<string> SendForgetPasswordEmail(string email, string name, int otp)
+        {
+            var subject = "Smart Campus Management - Password Reset Request";
+            var body = $@"Dear {name},
+
+                We received a request to reset the password for your Smart Campus Management account.
+
+                Please use the One-Time Password (OTP) below to reset your password:
+
+                Email: {email}
+                OTP: {otp}
+
+                This OTP is valid for the next 10 minutes. If you did not request a password reset, you can safely ignore this email.
+
+                Best regards,
+                Smart Campus Management Team";
 
             try
             {
@@ -565,9 +598,10 @@ namespace Smart_Campus_Management.Services
                 {
                     throw new Exception("User not found!");
                 }
-                dbcontext.Users.Remove(user);
+                user.Active = false;
+                dbcontext.Users.Update(user);
                 await dbcontext.SaveChangesAsync();
-                return $"User {id} deleted successfully.";
+                return $"User {user.Email} deleted successfully.";
             }
             catch (Exception ex)
             {
