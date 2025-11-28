@@ -17,7 +17,6 @@ namespace Smart_Campus_Management.Controllers
             _departmentServices = departmentServices;
         }
 
-        // ✅ CREATE - Admin Only
         [HttpPost("create")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateDepartment([FromBody] CreateDepartmentDTO model)
@@ -38,7 +37,6 @@ namespace Smart_Campus_Management.Controllers
             }
         }
 
-        // ✅ READ ALL - Admin Only
         [HttpGet("all")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllDepartments()

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Smart_Campus_Management.DTO;
 using Smart_Campus_Management.Interface;
+using Smart_Campus_Management.Models;
 using Smart_Campus_Management.Services;
 using System.Text.Json;
 
@@ -69,7 +70,7 @@ namespace Smart_Campus_Management.Controllers
 
         }
 
-        // Find User by Email
+        // Find User by ID
         [HttpGet("{id}")]
         [Authorize]
         public async Task<IActionResult> FindUser(Guid id)
@@ -282,6 +283,43 @@ namespace Smart_Campus_Management.Controllers
                     Errors = new List<string> { ex.Message }
                 };
                 return StatusCode(500, response);
+            }
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<User>> GetLoggedInUser()
+        {
+            ServiceResponse<User> response = new ServiceResponse<User>();
+            response.data = null;
+            try
+            {
+                var email = User?.FindFirst("email")?.Value
+                    ?? User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                if (string.IsNullOrEmpty(email))
+                {
+                    response.Message = "Invalid token!";
+                    response.data = null;
+                }
+                var user = await _userService.FindUserByEmailAsync(email);
+                if(user == null)
+                {
+                    response.Message = "User not found!";
+                    response.data = null;
+                }
+                else
+                {
+                    response.Success = true;
+                    response.Message = "Success";
+                    response.data = user;
+                }
+
+                return Ok(response);
+            }
+            catch(Exception ex)
+            {
+                response.Message = ex.Message;
+                return BadRequest(response);
             }
         }
     }
