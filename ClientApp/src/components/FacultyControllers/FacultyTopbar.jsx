@@ -7,7 +7,7 @@ export default function FacultyTopbar({ title, user }) {
   const encodedName = encodeURIComponent(fullName || "User");
 
   // Generate avatar link using initials
-  const avatarUrl = `https://ui-avatars.com/api/?name=${encodedName}&background=random`;
+  const avatarUrl = `https://ui-avatars.com/api/?name=${encodedName}`;
 
   return (
     <div className="topbar">

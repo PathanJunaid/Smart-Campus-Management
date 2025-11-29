@@ -220,25 +220,25 @@ const UserProfile = ({ userId, initialData, onCancel }) => {
                         </div>
 
                         {/* Actions */}
-                        <div className="form-actions">
-                            {onCancel && (
-                                <button
-                                    type="button"
-                                    className="btn btn-secondary"
-                                    onClick={onCancel}
-                                    disabled={isSaving}
-                                >
-                                    Cancel
-                                </button>
-                            )}
+                    </div>
+                    <div className="form-actions">
+                        {onCancel && (
                             <button
-                                type="submit"
-                                className="btn btn-primary"
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={onCancel}
                                 disabled={isSaving}
                             >
-                                {isSaving ? 'Saving...' : 'Update Profile'}
+                                Cancel
                             </button>
-                        </div>
+                        )}
+                        <button
+                            type="submit"
+                            className="btn btn-primary"
+                            disabled={isSaving}
+                        >
+                            {isSaving ? 'Saving...' : 'Update Profile'}
+                        </button>
                     </div>
                 </form>
             </div>

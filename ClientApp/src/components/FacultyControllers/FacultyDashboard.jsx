@@ -1,23 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import FacultySidebar from "./FacultySidebar";
+import Sidebar from "../Common/Sidebar";
 import FacultyTopbar from "./FacultyTopbar";
 import FacultyHome from "./FacultyHome";
 import FacultyAttendance from "./FacultyAttendance";
 import FacultyCourses from "./FacultyCourses";
 import FacultyStudents from "./FacultyStudents";
 import FacultyProfile from "./FacultyProfile";
-import { useSelector, useDispatch } from 'react-redux';
-import { logoutUser } from "../../store/authSlice";
-import "./FacultyDashboard.css";
+import { useSelector } from 'react-redux';
 
 export default function FacultyDashboard() {
   const { user } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
+
+  const menuItems = [
+    { name: "Dashboard", path: "/dashboard", icon: "Dashboard" },
+    { name: "Attendance", path: "/dashboard/attendance", icon: "Attendance" },
+    { name: "Courses", path: "/dashboard/courses", icon: "Courses" },
+    { name: "Students", path: "/dashboard/students", icon: "Students" },
+    { name: "Profile", path: "/dashboard/profile", icon: "Profile" },
+  ];
 
   return (
-    <div className="faculty-dashboard">
-      <FacultySidebar />
+    <div className="dashboard-container">
+      <Sidebar title="Faculty Panel" menuItems={menuItems} />
       <main className="main-content">
         <FacultyTopbar title="Dashboard" user={user} />
         <Routes>
