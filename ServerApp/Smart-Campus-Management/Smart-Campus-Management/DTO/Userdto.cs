@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Smart_Campus_Management.Models;
+﻿using Smart_Campus_Management.Models;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -40,24 +39,22 @@ namespace Smart_Campus_Management.DTO
     }
 
     public class Userdto
-        {
-            [Required(ErrorMessage = "name is required")]
-            [StringLength(50, MinimumLength = 3, ErrorMessage = "name must be between 3 to 50 letters.")]
-            public string FirstName { get; set; }
-            public string MiddleName { get; set; }
-            public string LastName { get; set; }
+    {
+        [Required(ErrorMessage = "First name is required")]
+        [StringLength(50, MinimumLength = 3, ErrorMessage = "First Name must be between 3 to 50 letters.")]
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string LastName { get; set; }
+        public Int64? RollNo { get; set; } // If student
 
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid Email format")]
+        public string Email { get; set; }
+        [RegularExpression(@"^[1-9][0-9]{9}$", ErrorMessage = "Mobile number must be 10 digits and cannot start with 0.")]
+        public long? MobileNumber { get; set; }
+        public UserRole Role { get; set; } = UserRole.Student;
 
-            [Required(ErrorMessage = "Email is required")]
-            [EmailAddress(ErrorMessage = "Invalid Email format")]
-            public string Email { get; set; }
-
-            [Required(ErrorMessage = "password is required.")]
-            [StringLength(20, MinimumLength = 8, ErrorMessage = "Password length must be between 8 to 20 letters.")]
-            public string Password { get; set; }
-            public string Role { get; set; } = "User";
-
-        }
+    }
     public class Logindto
     {
 
@@ -78,9 +75,9 @@ namespace Smart_Campus_Management.DTO
         public bool NeedsRegistration { get; set; } 
     }
     public class Namedto
-        {
-            public string Name { get; set; }
-        }
+    {
+        public string Name { get; set; }
+    }
 
     public class TokenDto
     {
@@ -89,5 +86,26 @@ namespace Smart_Campus_Management.DTO
         public string Email { get; set; }
         public UserRole Role { get; set; }
     }
+
+    public class UpdateEmailDto
+    {
+        [Required]
+        public Guid UserId { get; set; }
+
+        [Required]
+        [EmailAddress]
+        public string NewEmail { get; set; }
+    }
+
+    public class UpdateUserDto
+    {
+        [Required]
+        public Guid UserId { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string LastName { get; set; }
+        public UserRole Role { get; set; }
+        public long? MobileNumber { get; set; }
+        public DateOnly? DOB { get; set; }
+    }
 }
-    

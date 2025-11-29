@@ -5,6 +5,8 @@ using Smart_Campus_Management.Interface;
 using Smart_Campus_Management.Models;
 using Smart_Campus_Management.Services;
 using System.Text.Json;
+using Smart_Campus_Management.Helpers;
+using Smart_Campus_Management.Models;
 
 namespace Smart_Campus_Management.Controllers
 {
@@ -24,23 +26,25 @@ namespace Smart_Campus_Management.Controllers
         // Update User
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] Namedto body)
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto body)
         {
             try
             {
-                var result = await _userService.UpdateUserAsync(id, body.Name);
-                return Ok(new
+                // Extract role from claims
+                var roleClaim = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
+                if (!Enum.TryParse<UserRole>(roleClaim, out var requesterRole))
                 {
-                    data = new
-                    {
-                        id = result.Id,
-                        Name = result.FirstName,
-                        Email = result.Email,
-                        created_At = result.CreatedAt
-                    },
-                    message = "User Updated Successfully!",
-                    success = true
-                });
+                    return Unauthorized(new { message = "Invalid role claim", success = false });
+                }
+
+                var result = await _userService.UpdateUserAsync(body, requesterRole);
+                
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
 
             }
             catch (Exception ex)
@@ -61,7 +65,7 @@ namespace Smart_Campus_Management.Controllers
                 {
                     throw new Exception("User not found");
                 }
-                return Ok(new { data = result, message = "User deleted Successfully!" });
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -320,6 +324,78 @@ namespace Smart_Campus_Management.Controllers
             {
                 response.Message = ex.Message;
                 return BadRequest(response);
+            }
+        }
+        [HttpPost("AddUser")]
+        [Authorize] // Assuming only authorized users (likely Admin) can add users directly
+        public async Task<IActionResult> AddUser([FromBody] Userdto userDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var result = await _userService.AddUser(userDto);
+                if (!result.Success)
+                {
+                    return BadRequest(new { message = result.Message, success = false });
+                }
+                return Ok(new { data = result.data, message = result.Message, success = true });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, success = false });
+            }
+        }
+
+        [HttpPut("updateEmail")]
+        [Authorize]
+        public async Task<IActionResult> UpdateEmail([FromBody] UpdateEmailDto updateEmailDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var result = await _userService.UpdateEmail(updateEmailDto);
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, success = false });
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all users with optional filtering by search term, role, and active status.
+        /// </summary>
+        /// <param name="search">Search term for name, email, or mobile.</param>
+        /// <param name="role">Filter by user role.</param>
+        /// <param name="isActive">Filter by active status (default: true).</param>
+        /// <returns>List of users matching the criteria.</returns>
+        [HttpGet]
+        [Authorize("Admin")]
+        public async Task<IActionResult> GetAllUsers([FromQuery] string? search, [FromQuery] UserRole? role, [FromQuery] bool isActive = true, int PageSize = 30, int PageNumber = 1)
+        {
+            try
+            {
+                var result = await _userService.GetAllUsersAsync(search, role, isActive, PageNumber, PageSize);
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, success = false });
             }
         }
     }

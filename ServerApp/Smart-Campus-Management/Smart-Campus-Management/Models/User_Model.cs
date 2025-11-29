@@ -33,8 +33,11 @@ namespace Smart_Campus_Management.Models
             public bool Active { get; set; } = true;
             public UserRole Role { get; set; }
             public string? ProfilePicture { get; set; } = null;
+            [RegularExpression(@"^[1-9][0-9]{9}$", ErrorMessage = "Mobile number must be 10 digits and cannot start with 0.")]
             public Int64? MobileNumber { get; set; }
             public DateOnly? DOB { get; set; }
+            public bool ForcePasswordChange { get; set; }
+            
             [Required]
             [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Created once
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
