@@ -18,7 +18,7 @@ function App() {
 
   useEffect(() => {
     const verifyUser = async () => {
-      await dispatch(checkAuth());
+      dispatch(checkAuth());
       setIsChecking(false);
     };
     verifyUser();

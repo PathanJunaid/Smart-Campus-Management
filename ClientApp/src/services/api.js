@@ -1,11 +1,10 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 
 export const API = axios.create({
-  baseURL: "http://smartcampusbackend-env.eba-mcny2pk2.ap-south-1.elasticbeanstalk.com",
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 });
-
-import Cookies from "js-cookie";
 
 API.interceptors.request.use((config) => {
   const token = Cookies.get("accessToken");

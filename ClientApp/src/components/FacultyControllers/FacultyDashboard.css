@@ -273,6 +273,14 @@
   border: none;
   margin-top: 10px;
 }
+.email-text {
+  max-width: 40px;  /* limit width */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* trims with ... */
+  display: inline-block;   /* required for width restriction */
+}
+
 
 .edit-btn {
   background: var(--accent);

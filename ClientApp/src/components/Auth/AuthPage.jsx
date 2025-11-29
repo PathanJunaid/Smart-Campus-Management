@@ -7,7 +7,7 @@ export default function AuthPage({ onLoginSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
 
   return (
-    <div className="auth-container row">
+    <div className="auth-container row m-0">
       <div className="left-panel col-md-6 d-none d-md-flex text-center">
        <div>
          <h2>Welcome Back!</h2>

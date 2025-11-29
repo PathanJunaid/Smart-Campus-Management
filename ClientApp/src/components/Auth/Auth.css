@@ -51,11 +51,10 @@
 
 .form-section {
   width: 100%;
-  max-width: 350px;
-  text-align: center;
 }
 
 .form-section h2 {
+  text-align: center;
   color: #2DB79A;
   margin-bottom: 20px;
 }
@@ -100,10 +99,16 @@
 .toggle-text {
   margin-top: 15px;
   font-size: 14px;
+  text-align: center;
 }
 
 .toggle-text span {
   color: #2DB79A;
   cursor: pointer;
   font-weight: bold;
+}
+.error-text {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
 }

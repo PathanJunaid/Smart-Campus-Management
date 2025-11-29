@@ -130,7 +130,6 @@ export const authSlice = createSlice({
             .addCase(checkAuth.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.isSuccess = true;
-                // Handle if payload is wrapped in { data: ... } or is the user object directly
                 state.user = action.payload.data || action.payload;
                 if (action.payload.forcePasswordChange) {
                     state.needsRegistration = true;
