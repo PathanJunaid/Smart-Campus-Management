@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.3.1" />
     <PackageReference Include="BCrypt.Net" Version="0.1.0" />
     <PackageReference Include="EPPlus" Version="8.0.2" />
     <PackageReference Include="EPPlus.Interfaces" Version="8.0.0" />

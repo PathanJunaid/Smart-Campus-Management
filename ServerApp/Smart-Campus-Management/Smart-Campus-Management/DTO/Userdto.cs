@@ -21,6 +21,7 @@ namespace Smart_Campus_Management.DTO
         [Required(ErrorMessage = "Email is required")]
         [EmailAddress(ErrorMessage = "invalid email format.")]
         public string Email { get; set; }
+        public bool IsForgetPassword { get; set; } = false;
     }
     public class userSignUpStep2DTO : userSignUpStep1DTO {
         [Required(ErrorMessage = "password is required.")]
@@ -29,6 +30,7 @@ namespace Smart_Campus_Management.DTO
         [Required(ErrorMessage = "OTP is Reqiured")]
         [Range(100000, 999999, ErrorMessage = "OTP must be exactly 6 digits.")]
         public int OTP { get; set; }
+        public bool IsForgetPassword { get; set; } = false;
     }
     public class SignUpResponseDTO { 
         public string Message { get; set; } = string.Empty;

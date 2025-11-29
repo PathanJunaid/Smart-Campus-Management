@@ -1,0 +1,9 @@
+.vs/
+*.vsidx
+bin/
+obj/
+node_modules/
+*.user
+*.suo
+.git/
+publish/

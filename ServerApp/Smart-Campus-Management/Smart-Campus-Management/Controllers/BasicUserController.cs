@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Smart_Campus_Management.DTO;
 using Smart_Campus_Management.Interface;
+using Smart_Campus_Management.Models;
 using Smart_Campus_Management.Services;
 using System.Text.Json;
 using Smart_Campus_Management.Helpers;
@@ -73,7 +74,7 @@ namespace Smart_Campus_Management.Controllers
 
         }
 
-        // Find User by Email
+        // Find User by ID
         [HttpGet("{id}")]
         [Authorize]
         public async Task<IActionResult> FindUser(Guid id)
