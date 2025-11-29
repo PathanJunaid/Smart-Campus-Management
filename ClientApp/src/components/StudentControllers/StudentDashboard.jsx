@@ -1,6 +1,7 @@
 // src/components/StudentControllers/StudentDashboard.jsx
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../store/authSlice";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
@@ -12,40 +13,24 @@ import Profile from "./Profile";
 import "./StudentDashboard.css";
 
 export default function StudentDashboard() {
-  const [activePage, setActivePage] = useState("Dashboard");
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    if (activePage === "Logout") {
-      dispatch(logoutUser());
-    }
-  }, [activePage, dispatch]);
-
-  const renderPage = () => {
-    switch (activePage) {
-      case "Dashboard":
-        return <DashboardHome />;
-      case "Attendance":
-        return <Attendance />;
-      case "Courses":
-        return <Courses />;
-      case "Teachers":
-        return <Teachers />;
-      case "Profile":
-        return <Profile />;
-      case "Logout":
-        return <div style={{ padding: 20 }}>Logging out...</div>;
-      default:
-        return <DashboardHome />;
-    }
-  };
+  const { user } = useSelector((state) => state.auth);
 
   return (
     <div className="student-dashboard">
-      <Sidebar activePage={activePage} setActivePage={setActivePage} />
+      <Sidebar />
       <main className="main-content">
-        <Topbar title={activePage} />
-        <div className="page-container">{renderPage()}</div>
+        <Topbar title="Dashboard" />
+        <div className="page-container">
+          <Routes>
+            <Route path="/" element={<DashboardHome />} />
+            <Route path="attendance" element={<Attendance />} />
+            <Route path="courses" element={<Courses />} />
+            <Route path="teachers" element={<Teachers />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="profile/edit" element={<Profile editMode={true} />} />
+            <Route path="*" element={<Navigate to="" replace />} />
+          </Routes>
+        </div>
       </main>
     </div>
   );

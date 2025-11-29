@@ -1,80 +1,84 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { checkAuth } from "../../store/authSlice";
+import UserProfile from "../UserProfile/UserProfile";
 
-export default function FacultyProfile() {
-  const [data, setData] = useState({
-    name: "Prof. Shaheen Ali",
-    facultyId: "F1023",
-    department: "Computer Science",
-    contact: "9876543210",
-    photo: "https://cdn-icons-png.flaticon.com/512/2922/2922510.png"
-  });
+export default function FacultyProfile({ editMode = false }) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
 
-  const [edit, setEdit] = useState(false);
-  const [temp, setTemp] = useState(data);
+  useEffect(() => {
+    if (!user) {
+      dispatch(checkAuth());
+    }
+  }, [user, dispatch]);
 
-  const handleChange = (e) =>
-    setTemp({ ...temp, [e.target.name]: e.target.value });
+  if (editMode) {
+    return <UserProfile userId={user?.id} initialData={user} onCancel={() => navigate("../profile")} />;
+  }
 
-  const handlePhoto = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setTemp({ ...temp, photo: URL.createObjectURL(file) });
-  };
-
-  const save = () => {
-    setData(temp);
-    setEdit(false);
-  };
-
-  const cancel = () => {
-    setTemp(data);
-    setEdit(false);
-  };
+  if (!user) {
+    return <div>Loading profile...</div>;
+  }
 
   return (
-    <div className="page-box profile-page">
-      <h3 className="page-title">Faculty Profile</h3>
-
-      <div className="profile-box">
-        <div className="profile-photo-section">
-          <img src={edit ? temp.photo : data.photo} alt="" />
-          {edit && (
-            <label className="upload-btn">
-              Upload Photo
-              <input type="file" onChange={handlePhoto} accept="image/*" />
-            </label>
-          )}
+    <div className="page-box">
+      <div className="card-container">
+        <div className="card-header">
+          <h3 className="card-title">Faculty Profile</h3>
         </div>
 
-        <div className="profile-info">
+        <div className="profile-grid">
+          {/* Left Column: Avatar & Status */}
+          <div className="profile-sidebar">
+            <img
+              src={user.photo || "https://cdn-icons-png.flaticon.com/512/2922/2922510.png"}
+              alt="Profile"
+              className="profile-avatar"
+            />
+            <h2 className="profile-name">{user.firstName} {user.lastName}</h2>
+            <div className="profile-role">{user.role === 1 ? 'Faculty Member' : 'User'}</div>
+            <div className={`status-badge ${user.active ? 'status-active' : 'status-inactive'}`}>
+              {user.active ? 'Active Account' : 'Inactive'}
+            </div>
+          </div>
 
-          {edit ? (
-            <>
-              <p><b>Name:</b> <input name="name" value={temp.name} onChange={handleChange} /></p>
-              <p><b>Faculty ID:</b> <input name="facultyId" value={temp.facultyId} onChange={handleChange} /></p>
-              <p><b>Department:</b> <input name="department" value={temp.department} onChange={handleChange} /></p>
-              <p><b>Contact:</b> <input name="contact" value={temp.contact} onChange={handleChange} /></p>
-
-              <div className="edit-buttons">
-                <button className="save-btn" onClick={save}>Save</button>
-                <button className="cancel-btn" onClick={cancel}>Cancel</button>
+          {/* Right Column: Details */}
+          <div className="profile-content">
+            <div className="profile-details">
+              <div className="detail-item">
+                <span className="detail-label">Email Address</span>
+                <span className="detail-value">{user.email}</span>
               </div>
-            </>
-          ) : (
-            <>
-              <p><b>Name:</b> {data.name}</p>
-              <p><b>Faculty ID:</b> {data.facultyId}</p>
-              <p><b>Department:</b> {data.department}</p>
-              <p><b>Contact:</b> {data.contact}</p>
+              <div className="detail-item">
+                <span className="detail-label">Mobile Number</span>
+                <span className="detail-value">{user.mobileNumber}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Date of Birth</span>
+                <span className="detail-value">{user.dob ? new Date(user.dob).toLocaleDateString() : 'N/A'}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Faculty ID</span>
+                <span className="detail-value">{user.facultyId || 'N/A'}</span>
+              </div>
+              <div className="detail-item">
+                <span className="detail-label">Department</span>
+                <span className="detail-value">{user.department || 'N/A'}</span>
+              </div>
+            </div>
 
-              <button className="edit-btn" onClick={() => setEdit(true)}>
+            <div className="profile-actions">
+              <button className="btn btn-primary" onClick={() => navigate("edit")}>
                 Edit Profile
               </button>
-            </>
-          )}
-
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+

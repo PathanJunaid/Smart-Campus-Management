@@ -8,6 +8,7 @@ import FacultyDashboard from './components/FacultyControllers/FacultyDashboard'
 import StudentDashboard from './components/StudentControllers/StudentDashboard'
 import ProtectedRoute from './components/ProtectedRoute';
 import { checkAuth } from './store/authSlice';
+import UserProfile from './components/UserProfile/UserProfile';
 
 
 function App() {
@@ -36,11 +37,17 @@ function App() {
     <Routes>
       <Route path="/login" element={!user ? <AuthPage /> : <Navigate to="/dashboard" replace />} />
 
-      <Route path="/dashboard" element={
+      <Route path="/dashboard/*" element={
         <ProtectedRoute>
           {user?.role === 2 && <StudentDashboard user={user} />}
           {user?.role === 1 && <FacultyDashboard user={user} />}
           {/* {user?.role === 0 && <AdminDashboard user={user} />} */}
+        </ProtectedRoute>
+      } />
+
+      <Route path="/user/:id" element={
+        <ProtectedRoute>
+          <UserProfile />
         </ProtectedRoute>
       } />
 
