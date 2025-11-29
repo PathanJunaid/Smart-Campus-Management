@@ -1,5 +1,7 @@
 // src/components/StudentControllers/StudentDashboard.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../../store/authSlice";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import DashboardHome from "./DashboardHome";
@@ -11,6 +13,13 @@ import "./StudentDashboard.css";
 
 export default function StudentDashboard() {
   const [activePage, setActivePage] = useState("Dashboard");
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (activePage === "Logout") {
+      dispatch(logoutUser());
+    }
+  }, [activePage, dispatch]);
 
   const renderPage = () => {
     switch (activePage) {
@@ -25,7 +34,7 @@ export default function StudentDashboard() {
       case "Profile":
         return <Profile />;
       case "Logout":
-        return <div style={{padding:20}}>Logging out...</div>;
+        return <div style={{ padding: 20 }}>Logging out...</div>;
       default:
         return <DashboardHome />;
     }

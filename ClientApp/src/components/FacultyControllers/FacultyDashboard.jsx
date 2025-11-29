@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FacultySidebar from "./FacultySidebar";
 import FacultyTopbar from "./FacultyTopbar";
 import FacultyHome from "./FacultyHome";
@@ -6,12 +6,20 @@ import FacultyAttendance from "./FacultyAttendance";
 import FacultyCourses from "./FacultyCourses";
 import FacultyStudents from "./FacultyStudents";
 import FacultyProfile from "./FacultyProfile";
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { logoutUser } from "../../store/authSlice";
 import "./FacultyDashboard.css";
 
 export default function FacultyDashboard() {
   const [page, setPage] = useState("Dashboard");
   const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (page === "Logout") {
+      dispatch(logoutUser());
+    }
+  }, [page, dispatch]);
 
   const renderPage = () => {
     switch (page) {
@@ -29,7 +37,7 @@ export default function FacultyDashboard() {
     <div className="faculty-dashboard">
       <FacultySidebar page={page} setPage={setPage} />
       <main className="main-content">
-        <FacultyTopbar title={page} user={user}/>
+        <FacultyTopbar title={page} user={user} />
         {renderPage()}
       </main>
     </div>

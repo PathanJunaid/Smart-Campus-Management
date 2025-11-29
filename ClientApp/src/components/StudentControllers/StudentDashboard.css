@@ -129,7 +129,7 @@
   font-size: 55px;
   font-weight: 700;
   color: var(--accent);
-  margin: 10px 0;
+  margin: 4px 0;
 }
 
 /* List text centered */
@@ -147,7 +147,7 @@
 /* Hover animation */
 .card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
   transition: 0.25s ease;
 }
 
@@ -171,7 +171,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-   animation: fadeUp 0.8s ease forwards;
+  animation: fadeUp 0.8s ease forwards;
 }
 
 .table th {
@@ -212,7 +212,7 @@
 .profile-page {
   display: flex;
   justify-content: center;
-  
+
 }
 
 .profile-box {
@@ -302,8 +302,15 @@
 
 /* ==================== ANIMATIONS ==================== */
 @keyframes fadeUp {
-  0% { transform: translateY(20px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* ==================== RESPONSIVE ==================== */

@@ -395,7 +395,7 @@ namespace Smart_Campus_Management.Controllers
         /// <param name="isActive">Filter by active status (default: true).</param>
         /// <returns>List of users matching the criteria.</returns>
         [HttpGet]
-        [Authorize("Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllUsers([FromQuery] string? search, [FromQuery] UserRole? role, [FromQuery] bool isActive = true, int PageSize = 30, int PageNumber = 1)
         {
             try

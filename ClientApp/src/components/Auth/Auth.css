@@ -63,7 +63,111 @@
 .form-section input {
   width: 100%;
   padding: 12px 15px;
-  margin: 10px 0;
+  margin: 4px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.primary-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 25px;
+  background: #2DB79A;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  background: #25a288;
+}
+
+/* Social Icons */
+.social-icons {
+  margin-bottom: 15px;
+}
+
+.social-icons i {
+  font-size: 22px;
+  margin: 0 10px;
+  cursor: pointer;
+  color: #444;
+}
+
+.toggle-text {
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.auth-container {
+  height: 100vh;
+  display: flex;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Left Panel */
+.left-panel {
+  background: #2DB79A;
+  color: white;
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.left-panel h2 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.left-panel p {
+  opacity: 0.9;
+  margin-bottom: 30px;
+}
+
+.switch-btn {
+  border: 2px solid white;
+  background: transparent;
+  padding: 12px 35px;
+  color: white;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.switch-btn:hover {
+  background: white;
+  color: #2DB79A;
+}
+
+/* Right Panel */
+.right-panel {
+  background: white;
+  padding: 60px 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.form-section {
+  width: 100%;
+}
+
+.form-section h2 {
+  text-align: center;
+  color: #2DB79A;
+  margin-bottom: 20px;
+}
+
+/* Inputs */
+.form-section input {
+  width: 100%;
+  padding: 12px 15px;
+  margin: 4px 0;
   border-radius: 8px;
   border: 1px solid #ccc;
 }
@@ -107,8 +211,50 @@
   cursor: pointer;
   font-weight: bold;
 }
+
 .error-text {
   color: red;
   font-size: 12px;
-  margin-top: 4px;
+  text-align: start;
+}
+
+.forget-password {
+  text-align: right;
+  color: #2DB79A;
+  cursor: pointer;
+  font-weight: 500;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  transition: 0.3s;
+}
+
+.forget-password:hover {
+  color: #25a288;
+  text-decoration: underline;
+}
+
+.password-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-input-container input {
+  padding-right: 40px;
+  /* Make space for the eye icon */
+}
+
+.eye-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eye-icon:hover {
+  color: #2DB79A;
 }
