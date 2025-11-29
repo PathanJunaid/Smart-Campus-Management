@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Smart_Campus_Management.DTO;
+using Smart_Campus_Management.Helpers;
 using Smart_Campus_Management.Interface;
+using Smart_Campus_Management.Models;
 using Smart_Campus_Management.Models;
 using Smart_Campus_Management.Services;
 using System.Text.Json;
-using Smart_Campus_Management.Helpers;
-using Smart_Campus_Management.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Smart_Campus_Management.Controllers
 {
@@ -148,18 +149,18 @@ namespace Smart_Campus_Management.Controllers
                 var result = await _userService.LoginService(logindata);
                 return Ok(new
                 {
-                    data = result.User == null ? null : new
+                    data = result.User == null ? null : new UserResponseDTO
                     {
-                        id = result.User.Id,
+                        Id = result.User.Id,
                         FirstName = result.User.FirstName,
                         MiddleName = result.User.MiddleName,
                         LastName = result.User.LastName,
-                        RollNO = result.User.RollNo,
+                        RollNo = result.User.RollNo,
                         Email = result.User.Email,
-                        created_At = result.User.CreatedAt,
+                        CreatedAt = result.User.CreatedAt,
                         Role = result.User.Role,
                         DOB = result.User.DOB,
-                        MobileNo = result.User.MobileNumber,
+                        MobileNumber = result.User.MobileNumber,
                         ProfilePicture = result.User.ProfilePicture,
                     },
                     accessToken = result.Jwt,
@@ -294,7 +295,7 @@ namespace Smart_Campus_Management.Controllers
         [Authorize]
         public async Task<ActionResult<User>> GetLoggedInUser()
         {
-            ServiceResponse<User> response = new ServiceResponse<User>();
+            ServiceResponse<UserResponseDTO> response = new ServiceResponse<UserResponseDTO>();
             response.data = null;
             try
             {
@@ -305,8 +306,8 @@ namespace Smart_Campus_Management.Controllers
                     response.Message = "Invalid token!";
                     response.data = null;
                 }
-                var user = await _userService.FindUserByEmailAsync(email);
-                if(user == null)
+                var result = await _userService.FindUserByEmailAsync(email);
+                if(result == null)
                 {
                     response.Message = "User not found!";
                     response.data = null;
@@ -315,7 +316,20 @@ namespace Smart_Campus_Management.Controllers
                 {
                     response.Success = true;
                     response.Message = "Success";
-                    response.data = user;
+                    response.data = new UserResponseDTO
+                    {
+                        Id = result.Id,
+                        FirstName = result.FirstName,
+                        MiddleName = result.MiddleName,
+                        LastName = result.LastName,
+                        RollNo = result.RollNo,
+                        Email = result.Email,
+                        CreatedAt = result.CreatedAt,
+                        Role = result.Role,
+                        DOB = result.DOB,
+                        MobileNumber = result.MobileNumber,
+                        ProfilePicture = result.ProfilePicture,
+                    };
                 }
 
                 return Ok(response);

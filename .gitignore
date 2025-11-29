@@ -8,6 +8,13 @@
 *.userosscache
 *.sln.docstates
 
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+ServerApp/Smart-Campus-Management/Smart-Campus-Management/publish_eb/
+
+
 # ASP.NET Secrets and Environment Files
 .env
 *.env.*
