@@ -4,6 +4,8 @@ using Smart_Campus_Management.DTO;
 using Smart_Campus_Management.Interface;
 using Smart_Campus_Management.Services;
 using System.Text.Json;
+using Smart_Campus_Management.Helpers;
+using Smart_Campus_Management.Models;
 
 namespace Smart_Campus_Management.Controllers
 {
@@ -358,6 +360,32 @@ namespace Smart_Campus_Management.Controllers
                     return BadRequest(ModelState);
                 }
                 var result = await _userService.UpdateEmail(updateEmailDto);
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, success = false });
+            }
+        }
+
+        /// <summary>
+        /// Retrieves all users with optional filtering by search term, role, and active status.
+        /// </summary>
+        /// <param name="search">Search term for name, email, or mobile.</param>
+        /// <param name="role">Filter by user role.</param>
+        /// <param name="isActive">Filter by active status (default: true).</param>
+        /// <returns>List of users matching the criteria.</returns>
+        [HttpGet]
+        [Authorize("Admin")]
+        public async Task<IActionResult> GetAllUsers([FromQuery] string? search, [FromQuery] UserRole? role, [FromQuery] bool isActive = true, int PageSize = 30, int PageNumber = 1)
+        {
+            try
+            {
+                var result = await _userService.GetAllUsersAsync(search, role, isActive, PageNumber, PageSize);
                 if (!result.Success)
                 {
                     return BadRequest(result);

@@ -1,6 +1,8 @@
 ﻿using Smart_Campus_Management.DTO;
 using Smart_Campus_Management.Models;
 
+using Smart_Campus_Management.Helpers;
+
 namespace Smart_Campus_Management.Interface
 {
     public interface IUserServices
@@ -16,5 +18,6 @@ namespace Smart_Campus_Management.Interface
         Task<ServiceResponse<User>> AddUser(Userdto userDto);
         Task<ServiceResponse<string>> UpdateEmail(UpdateEmailDto updateEmailDto);
         Task<ServiceResponse<User>> UpdateUserAsync(UpdateUserDto updateUserDto, UserRole requesterRole);
+        Task<ServiceResponse<PaginatedList<User>>> GetAllUsersAsync(string? search, UserRole? role, bool isActive = true, int pageNumber = 1, int pageSize = 30);
     }
 }

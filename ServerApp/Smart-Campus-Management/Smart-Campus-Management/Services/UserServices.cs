@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using OfficeOpenXml;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Smart_Campus_Management.Helpers;
 
 namespace Smart_Campus_Management.Services
 {
@@ -785,6 +786,12 @@ namespace Smart_Campus_Management.Services
                     response.Message = "User with this email already exists.";
                     return response;
                 }
+                if (userDto.Role == UserRole.Student && !userDto.RollNo.HasValue)
+                {
+                    response.Success = false;
+                    response.Message = "Student Must have a Roll No.";
+                    return response;
+                }
 
                 var user = new User
                 {
@@ -796,6 +803,8 @@ namespace Smart_Campus_Management.Services
                     ForcePasswordChange = true,
                     Password = null,
                     Active = true,
+                    MobileNumber = userDto.MobileNumber,
+                    RollNo = userDto.RollNo,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -890,6 +899,51 @@ namespace Smart_Campus_Management.Services
                 await _logServices.LogToDatabase("UpdateEmail", "Failure", ex.Message, JsonSerializer.Serialize(updateEmailDto));
                 response.Success = false;
                 response.Message = $"Failed to update email: {ex.Message}";
+                return response;
+            }
+        }
+
+        public async Task<ServiceResponse<PaginatedList<User>>> GetAllUsersAsync(string? search, UserRole? role, bool isActive = true, int pageNumber = 1, int pageSize = 30)
+        {
+            var response = new ServiceResponse<PaginatedList<User>>();
+            try
+            {
+                var query = dbcontext.Users.AsQueryable();
+
+                // Filter by Active status
+                query = query.Where(u => u.Active == isActive);
+
+                // Filter by Role if provided
+                if (role.HasValue)
+                {
+                    query = query.Where(u => u.Role == role.Value);
+                }
+
+                // Filter by Search term if provided
+                if (!string.IsNullOrEmpty(search))
+                {
+                    search = search.ToLower();
+                    query = query.Where(u => 
+                        u.Email.ToLower().Contains(search) ||
+                        u.FirstName.ToLower().Contains(search) ||
+                        (u.MiddleName != null && u.MiddleName.ToLower().Contains(search)) ||
+                        (u.LastName != null && u.LastName.ToLower().Contains(search)) ||
+                        (u.MobileNumber != null && u.MobileNumber.ToString().Contains(search))
+                    );
+                }
+
+                var paginatedUsers = await PaginatedList<User>.CreateAsync(query, pageNumber, pageSize);
+
+                response.Success = true;
+                response.Message = "Users retrieved successfully.";
+                response.data = paginatedUsers;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                await _logServices.LogToDatabase("GetAllUsers", "Failure", ex.Message, JsonSerializer.Serialize(new { search, role, isActive, pageNumber, pageSize }));
+                response.Success = false;
+                response.Message = $"Failed to retrieve users: {ex.Message}";
                 return response;
             }
         }
