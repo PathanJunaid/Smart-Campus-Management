@@ -24,6 +24,25 @@ namespace Smart_Campus_Management.Controllers
             _userService = userService;
             _logServices = logServices;
         }
+
+        private UserResponseDTO MapToUserResponseDTO(User user)
+        {
+            return new UserResponseDTO
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                MiddleName = user.MiddleName,
+                LastName = user.LastName,
+                RollNo = user.RollNo,
+                Email = user.Email,
+                CreatedAt = user.CreatedAt,
+                Role = user.Role,
+                DOB = user.DOB,
+                MobileNumber = user.MobileNumber,
+                ProfilePicture = user.ProfilePicture,
+            };
+        }
+
         // Update User
         [HttpPut("{id}")]
         [Authorize]
@@ -45,7 +64,12 @@ namespace Smart_Campus_Management.Controllers
                     return BadRequest(result);
                 }
 
-                return Ok(result);
+                return Ok(new 
+                { 
+                    data = result.data != null ? MapToUserResponseDTO(result.data) : null,
+                    message = result.Message,
+                    success = result.Success 
+                });
 
             }
             catch (Exception ex)
@@ -89,7 +113,7 @@ namespace Smart_Campus_Management.Controllers
                 }
                 return Ok(new
                 {
-                    data = user,
+                    data = MapToUserResponseDTO(user),
                     message = "User found!",
                     success = true
                 });
@@ -149,20 +173,7 @@ namespace Smart_Campus_Management.Controllers
                 var result = await _userService.LoginService(logindata);
                 return Ok(new
                 {
-                    data = result.User == null ? null : new UserResponseDTO
-                    {
-                        Id = result.User.Id,
-                        FirstName = result.User.FirstName,
-                        MiddleName = result.User.MiddleName,
-                        LastName = result.User.LastName,
-                        RollNo = result.User.RollNo,
-                        Email = result.User.Email,
-                        CreatedAt = result.User.CreatedAt,
-                        Role = result.User.Role,
-                        DOB = result.User.DOB,
-                        MobileNumber = result.User.MobileNumber,
-                        ProfilePicture = result.User.ProfilePicture,
-                    },
+                    data = result.User == null ? null : MapToUserResponseDTO(result.User),
                     accessToken = result.Jwt,
                     message = result.Message,
                     success = result.Success,
@@ -316,20 +327,7 @@ namespace Smart_Campus_Management.Controllers
                 {
                     response.Success = true;
                     response.Message = "Success";
-                    response.data = new UserResponseDTO
-                    {
-                        Id = result.Id,
-                        FirstName = result.FirstName,
-                        MiddleName = result.MiddleName,
-                        LastName = result.LastName,
-                        RollNo = result.RollNo,
-                        Email = result.Email,
-                        CreatedAt = result.CreatedAt,
-                        Role = result.Role,
-                        DOB = result.DOB,
-                        MobileNumber = result.MobileNumber,
-                        ProfilePicture = result.ProfilePicture,
-                    };
+                    response.data = MapToUserResponseDTO(result);
                 }
 
                 return Ok(response);
@@ -356,7 +354,7 @@ namespace Smart_Campus_Management.Controllers
                 {
                     return BadRequest(new { message = result.Message, success = false });
                 }
-                return Ok(new { data = result.data, message = result.Message, success = true });
+                return Ok(new { data = result.data != null ? MapToUserResponseDTO(result.data) : null, message = result.Message, success = true });
             }
             catch (Exception ex)
             {
@@ -395,7 +393,7 @@ namespace Smart_Campus_Management.Controllers
         /// <param name="isActive">Filter by active status (default: true).</param>
         /// <returns>List of users matching the criteria.</returns>
         [HttpGet]
-        [Authorize("Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllUsers([FromQuery] string? search, [FromQuery] UserRole? role, [FromQuery] bool isActive = true, int PageSize = 30, int PageNumber = 1)
         {
             try
@@ -405,7 +403,21 @@ namespace Smart_Campus_Management.Controllers
                 {
                     return BadRequest(result);
                 }
-                return Ok(result);
+                
+                // Map the list of users to UserResponseDTO
+                var mappedData = new PaginatedList<UserResponseDTO>(
+                    result.data.Select(u => MapToUserResponseDTO(u)).ToList(),
+                    result.data.TotalCount,
+                    result.data.PageIndex,
+                    result.data.PageSize
+                );
+
+                return Ok(new 
+                { 
+                    data = mappedData, 
+                    message = result.Message, 
+                    success = result.Success 
+                });
             }
             catch (Exception ex)
             {

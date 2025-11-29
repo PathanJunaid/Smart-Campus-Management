@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "../services/authService";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import { toast } from "react-toastify";
 
 // Async thunk for login
 export const loginUser = createAsyncThunk(
@@ -9,6 +10,25 @@ export const loginUser = createAsyncThunk(
     async ({ email, password }, thunkAPI) => {
         try {
             const data = await authService.login(email, password);
+            if (data.needsRegistration) {
+                console.log(data);
+                toast.success(data.message);
+            }
+            if (!data?.success && !data.needsRegistration) {
+                if (data.errors?.length > 0) {
+                    console.log(data.errors);
+                    data.errors.forEach((error) => {
+                        toast.error(error);
+                    });
+                } else {
+                    console.log(data.message);
+                    toast.error(data.message);
+                }
+            }
+            if (data.success) {
+                console.log(data.message);
+                toast.success(data.message);
+            }
             return data;
         } catch (error) {
             const message =

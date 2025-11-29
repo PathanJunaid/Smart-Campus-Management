@@ -19,18 +19,20 @@ const logout = async () => {
     return { success: true };
 };
 
-const signupStep1 = async (email) => {
+const signupStep1 = async (email, isForgetPassword) => {
     const res = await API.post("/api/users/signup/step1", {
-        email
+        email,
+        isForgetPassword
     });
     return res.data;
 };
 
-const signupStep2 = async (email, password, otp) => {
+const signupStep2 = async (email, password, otp, isForgetPassword) => {
     const res = await API.post("/api/users/signup/step2", {
         email,
         password,
-        otp
+        otp,
+        isForgetPassword
     })
 
     return res.data;

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginUser, reset } from "../../store/authSlice";
 import { toast } from "react-toastify";
 
-export default function Login({ setIsLogin }) {
+export default function Login({ setIsLogin, setIsForgetPassword }) {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -25,15 +25,6 @@ export default function Login({ setIsLogin }) {
   } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    if (isError) {
-      toast.error(message);
-    }
-    if (needsRegistration) {
-      toast.warning("You need to change your password.");
-    }
-    if (isSuccess || user) {
-      // toast.success("Login Successful");
-    }
     dispatch(reset());
   }, [user, isError, isSuccess, message, needsRegistration, dispatch]);
 
@@ -110,7 +101,15 @@ export default function Login({ setIsLogin }) {
           onChange={handleChange}
         />
         {errors.password && <p className="error-text">{errors.password}</p>}
-
+        <p
+          className="forget-password"
+          onClick={() => {
+            setIsForgetPassword(true);
+            setIsLogin(false);
+          }}
+        >
+          Forget Password?
+        </p>
         <button
           className="primary-btn"
           type="submit"
@@ -123,7 +122,7 @@ export default function Login({ setIsLogin }) {
                 role="status"
                 aria-hidden="true"
               ></span>
-              <span className="ms-2">Loading...</span>
+              <span className="ms-2">Logging...</span>
             </>
           ) : (
             "LOGIN"
@@ -133,7 +132,14 @@ export default function Login({ setIsLogin }) {
 
       <p className="toggle-text">
         Don’t have an account?{" "}
-        <span onClick={() => setIsLogin(false)}>Create Account</span>
+        <span
+          onClick={() => {
+            setIsForgetPassword(false);
+            setIsLogin(false);
+          }}
+        >
+          Create Account
+        </span>
       </p>
     </div>
   );

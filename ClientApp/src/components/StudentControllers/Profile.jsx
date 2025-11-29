@@ -1,46 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { checkAuth } from "../../store/authSlice";
+import UserProfile from "../UserProfile/UserProfile";
 import "./StudentDashboard.css";
 
-export default function Profile() {
-  // Initial profile data (later connect to backend)
-  const [profile, setProfile] = useState({
-    name: "Mohammad Kamran",
-    roll: "2110013135053",
-    program: "B.Tech CSE",
-    year: "4th Year",
-    contact: "9580055187",
-    photo:
-      "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" // default avatar
-  });
+export default function Profile({ editMode = false }) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
 
-  const [editMode, setEditMode] = useState(false);
-  const [tempData, setTempData] = useState(profile); // used while editing
+  useEffect(() => {
+    if (!user) {
+      dispatch(checkAuth());
+    }
+  }, [user, dispatch]);
 
-  // Handle profile picture upload
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  if (editMode) {
+    return <UserProfile userId={user?.id} initialData={user} onCancel={() => navigate("../profile")} />;
+  }
 
-    const imgURL = URL.createObjectURL(file);
-    setTempData({ ...tempData, photo: imgURL });
-  };
-
-  // Handle text change
-  const handleChange = (e) => {
-    setTempData({ ...tempData, [e.target.name]: e.target.value });
-  };
-
-  // Save profile
-  const handleSave = () => {
-    setProfile(tempData);
-    setEditMode(false);
-  };
-
-  // Cancel edit
-  const handleCancel = () => {
-    setTempData(profile);
-    setEditMode(false);
-  };
+  if (!user) {
+    return <div>Loading profile...</div>;
+  }
 
   return (
     <div className="page-box profile-page">
@@ -49,96 +31,30 @@ export default function Profile() {
       <div className="profile-box">
         {/* Profile Photo + Upload */}
         <div className="profile-photo-section">
-          <img src={editMode ? tempData.photo : profile.photo} alt="Profile" />
-
-          {editMode && (
-            <label className="upload-btn">
-              Upload Photo
-              <input type="file" accept="image/*" onChange={handlePhotoUpload} />
-            </label>
-          )}
+          <img
+            src={user.photo || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
+            alt="Profile"
+          />
         </div>
 
         {/* Profile Info Form */}
         <div className="profile-info">
+          <>
+            <p><b>Name:</b> {user.firstName} {user.lastName}</p>
+            <p><b>Email:</b> {user.email}</p>
+            <p><b>Contact:</b> {user.mobileNumber}</p>
+            <p><b>Date of Birth:</b> {user.dob ? new Date(user.dob).toLocaleDateString() : 'N/A'}</p>
+            {/* Add other fields if available in user object */}
+            {user.rollNo && <p><b>Roll No:</b> {user.rollNo}</p>}
+            {user.program && <p><b>Program:</b> {user.program}</p>}
 
-          {editMode ? (
-            <>
-              <p>
-                <b>Name:</b>{" "}
-                <input
-                  type="text"
-                  name="name"
-                  value={tempData.name}
-                  onChange={handleChange}
-                />
-              </p>
-
-              <p>
-                <b>Roll No:</b>{" "}
-                <input
-                  type="text"
-                  name="roll"
-                  value={tempData.roll}
-                  onChange={handleChange}
-                />
-              </p>
-
-              <p>
-                <b>Program:</b>{" "}
-                <input
-                  type="text"
-                  name="program"
-                  value={tempData.program}
-                  onChange={handleChange}
-                />
-              </p>
-
-              <p>
-                <b>Year:</b>{" "}
-                <input
-                  type="text"
-                  name="year"
-                  value={tempData.year}
-                  onChange={handleChange}
-                />
-              </p>
-
-              <p>
-                <b>Contact:</b>{" "}
-                <input
-                  type="text"
-                  name="contact"
-                  value={tempData.contact}
-                  onChange={handleChange}
-                />
-              </p>
-
-              <div className="edit-buttons">
-                <button className="save-btn" onClick={handleSave}>
-                  Save
-                </button>
-                <button className="cancel-btn" onClick={handleCancel}>
-                  Cancel
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <p><b>Name:</b> {profile.name}</p>
-              <p><b>Roll No:</b> {profile.roll}</p>
-              <p><b>Program:</b> {profile.program}</p>
-              <p><b>Year:</b> {profile.year}</p>
-              <p><b>Contact:</b> {profile.contact}</p>
-
-              <button
-                className="edit-btn"
-                onClick={() => setEditMode(true)}
-              >
-                Edit Profile
-              </button>
-            </>
-          )}
+            <button
+              className="edit-btn"
+              onClick={() => navigate("edit")}
+            >
+              Edit Profile
+            </button>
+          </>
         </div>
       </div>
     </div>

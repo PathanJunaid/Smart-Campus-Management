@@ -1,42 +1,38 @@
-// src/components/StudentControllers/StudentDashboard.jsx
-import React, { useState } from "react";
-import Sidebar from "./Sidebar";
-import Topbar from "./Topbar";
-import DashboardHome from "./DashboardHome";
-import Attendance from "./Attendance";
-import Courses from "./Courses";
-import Teachers from "./Teachers";
-import Profile from "./Profile";
-import "./StudentDashboard.css";
+import React from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import Sidebar from "../Common/Sidebar";
+import { useSelector } from 'react-redux';
 
 export default function StudentDashboard() {
-  const [activePage, setActivePage] = useState("Dashboard");
+  const { user } = useSelector((state) => state.auth);
 
-  const renderPage = () => {
-    switch (activePage) {
-      case "Dashboard":
-        return <DashboardHome />;
-      case "Attendance":
-        return <Attendance />;
-      case "Courses":
-        return <Courses />;
-      case "Teachers":
-        return <Teachers />;
-      case "Profile":
-        return <Profile />;
-      case "Logout":
-        return <div style={{padding:20}}>Logging out...</div>;
-      default:
-        return <DashboardHome />;
-    }
-  };
+  const menuItems = [
+    { name: "Dashboard", path: "/dashboard", icon: "Dashboard" },
+    { name: "Attendance", path: "/dashboard/attendance", icon: "Attendance" },
+    { name: "Courses", path: "/dashboard/courses", icon: "Courses" },
+    { name: "Teachers", path: "/dashboard/teachers", icon: "Teachers" },
+    { name: "Profile", path: "/dashboard/profile", icon: "Profile" },
+  ];
 
   return (
-    <div className="student-dashboard">
-      <Sidebar activePage={activePage} setActivePage={setActivePage} />
+    <div className="dashboard-container">
+      <Sidebar title="Student Panel" menuItems={menuItems} />
       <main className="main-content">
-        <Topbar title={activePage} />
-        <div className="page-container">{renderPage()}</div>
+        <div className="topbar">
+          <h2>Dashboard</h2>
+          <div className="user-menu">
+            <span className="name">{user?.firstName} {user?.lastName}</span>
+          </div>
+        </div>
+        <Routes>
+          <Route path="/" element={<StudentHome />} />
+          <Route path="attendance" element={<StudentAttendance />} />
+          <Route path="courses" element={<StudentCourses />} />
+          <Route path="teachers" element={<StudentTeachers />} />
+          <Route path="profile" element={<StudentProfile />} />
+          <Route path="profile/edit" element={<StudentProfile editMode={true} />} />
+          <Route path="*" element={<Navigate to="" replace />} />
+        </Routes>
       </main>
     </div>
   );

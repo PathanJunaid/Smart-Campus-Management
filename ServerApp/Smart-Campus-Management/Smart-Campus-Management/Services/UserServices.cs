@@ -693,7 +693,6 @@ namespace Smart_Campus_Management.Services
                 {
                     response.Success = false;
                     response.Message = "No User found with the provided Email.";
-                    response.Errors.Add("Invalid Email.");
                     await _logServices.LogToDatabase("Login", "Failure", response.Message, JsonSerializer.Serialize(logindata.Email));
                     return response;
                 }
