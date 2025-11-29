@@ -18,7 +18,7 @@ export default function FacultyDashboard() {
       case "Courses": return <FacultyCourses />;
       case "Students": return <FacultyStudents />;
       case "Profile": return <FacultyProfile />;
-      case "Logout" : return <div style={{padding:20}}>Logging out...</div>;
+      case "Logout": return <div style={{ padding: 20 }}>Logging out...</div>;
       default: return <FacultyHome />;
     }
   };
