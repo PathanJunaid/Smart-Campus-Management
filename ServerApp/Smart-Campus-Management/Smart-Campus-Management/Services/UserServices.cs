@@ -260,7 +260,7 @@ namespace Smart_Campus_Management.Services
                             {
                                 await dbcontext.Users.AddAsync(user);
                                 await dbcontext.SaveChangesAsync();
-                                if (UploadedData.DepartmentId != null)
+                                if (UploadedData.DepartmentId != null && UploadedData.Role == UserRole.Student)
                                 {
                                     AddEnrollmentDTO addEnrollmentDTO = new AddEnrollmentDTO
                                     {
@@ -354,17 +354,8 @@ namespace Smart_Campus_Management.Services
 
                 if (user == null)
                 {
-                    // Check which field(s) did not match
-                    var emailExists = await dbcontext.Users.AnyAsync(u => u.Email == signUpData.Email);
-
-                    if (!emailExists)
-                    {
-                        response.Errors.Add("No user found with the provided Email.");
-                    }else if (user.Password== null)
-                    {
-                        response.Errors.Add("Already Registered. Please Login");
-                    }
-                    response.Message = "User verification failed.";
+                    response.Errors.Add("No user found with the provided Email.");
+                    response.Message = "No user found with the provided Email.";
                     response.Success = false;
                     await _logServices.LogToDatabase("SignUpStep1", "Failure", response.Message, JsonSerializer.Serialize(signUpData));
                     return response;
@@ -485,6 +476,7 @@ namespace Smart_Campus_Management.Services
 
                 // Update user with password
                 user.Password = hashedPassword;
+                user.ForcePasswordChange = false;
                 user.UpdatedAt = DateTime.UtcNow;
                 dbcontext.Users.Update(user);
 
@@ -532,28 +524,85 @@ namespace Smart_Campus_Management.Services
 
         }
 
-
-
-
-        public async Task<User> UpdateUserAsync(Guid id, string Name)
+        private async Task<string> SendForgetPasswordEmail(string email, string name, int otp)
         {
+            var subject = "Smart Campus Management - Password Reset Request";
+            var body = $@"Dear {name},
+
+                We received a request to reset the password for your Smart Campus Management account.
+
+                Please use the One-Time Password (OTP) below to reset your password:
+
+                Email: {email}
+                OTP: {otp}
+
+                This OTP is valid for the next 10 minutes. If you did not request a password reset, you can safely ignore this email.
+
+                Best regards,
+                Smart Campus Management Team";
+
             try
             {
-                var user = await FindUserAsync(id);
-                if (user == null)
-                {
-                    throw new Exception("User not found!");
-                }
-                user.FirstName = Name;
-                dbcontext.Users.Update(user);
-                await dbcontext.SaveChangesAsync();
-                return user;
+                var IsEmailSuccess = await _emailService.SendEmailAsync(email, subject, body);
+                return IsEmailSuccess;
             }
             catch (Exception ex)
             {
-                throw new Exception("Update failed!", ex);
+                Console.WriteLine("Error sending welcome email: " + ex.Message);
+                return ex.Message;
             }
 
+        }
+
+        public async Task<ServiceResponse<User>> UpdateUserAsync(UpdateUserDto updateUserDto, UserRole requesterRole)
+        {
+            var response = new ServiceResponse<User>();
+            try
+            {
+                var user = await FindUserAsync(updateUserDto.UserId);
+                if (user == null)
+                {
+                    response.Success = false;
+                    response.Message = "User not found!";
+                    return response;
+                }
+
+                // Update basic details
+                user.FirstName = updateUserDto.FirstName;
+                user.MiddleName = updateUserDto.MiddleName;
+                user.LastName = updateUserDto.LastName;
+                user.MobileNumber = updateUserDto.MobileNumber;
+                user.DOB = updateUserDto.DOB;
+
+                // Role update logic
+                if (requesterRole == UserRole.Admin)
+                {
+                    user.Role = updateUserDto.Role;
+                }
+                else if (user.Role != updateUserDto.Role)
+                {
+                    // If non-admin tries to change role, we can either ignore it or throw error.
+                    // Requirement says "Role can't be Changed handle this".
+                    // Let's ignore the role change but proceed with other updates, or return a warning message.
+                    // For now, we just don't update the role.
+                }
+
+                user.UpdatedAt = DateTime.UtcNow;
+                dbcontext.Users.Update(user);
+                await dbcontext.SaveChangesAsync();
+
+                response.Success = true;
+                response.Message = "User Updated Successfully!";
+                response.data = user;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                await _logServices.LogToDatabase("UpdateUser", "Failure", ex.Message, JsonSerializer.Serialize(updateUserDto));
+                response.Success = false;
+                response.Message = $"Update failed: {ex.Message}";
+                return response;
+            }
         }
 
         public async Task<string> DeleteUserAsync(Guid id)
@@ -723,5 +772,126 @@ namespace Smart_Campus_Management.Services
 
         }
 
+        public async Task<ServiceResponse<User>> AddUser(Userdto userDto)
+        {
+            var response = new ServiceResponse<User>();
+            try
+            {
+                // Check if user exists
+                var existingUser = await dbcontext.Users.FirstOrDefaultAsync(u => u.Email == userDto.Email);
+                if (existingUser != null)
+                {
+                    response.Success = false;
+                    response.Message = "User with this email already exists.";
+                    return response;
+                }
+
+                var user = new User
+                {
+                    FirstName = userDto.FirstName,
+                    MiddleName = userDto.MiddleName,
+                    LastName = userDto.LastName,
+                    Email = userDto.Email,
+                    Role = userDto.Role,
+                    ForcePasswordChange = true,
+                    Password = null,
+                    Active = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                await dbcontext.Users.AddAsync(user);
+                await dbcontext.SaveChangesAsync();
+
+                response.Success = true;
+                response.Message = "User added successfully.";
+                response.data = user;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                await _logServices.LogToDatabase("AddUser", "Failure", ex.Message, JsonSerializer.Serialize(userDto));
+                response.Success = false;
+                response.Message = $"Failed to add user: {ex.Message}";
+                return response;
+            }
+        }
+
+        public async Task<ServiceResponse<string>> UpdateEmail(UpdateEmailDto updateEmailDto)
+        {
+            var response = new ServiceResponse<string>();
+            using var transaction = await dbcontext.Database.BeginTransactionAsync();
+            try
+            {
+                var user = await dbcontext.Users.FirstOrDefaultAsync(u => u.Id == updateEmailDto.UserId);
+                if (user == null)
+                {
+                    response.Success = false;
+                    response.Message = "User not found.";
+                    return response;
+                }
+
+                // Check role (Only Student and Faculty can have email updated via this API as per requirement)
+                if (user.Role != UserRole.Student && user.Role != UserRole.Faculty)
+                {
+                    response.Success = false;
+                    response.Message = "Email update is only allowed for Students and Faculty.";
+                    return response;
+                }
+
+                // Check if new email is valid and not taken
+                if (!IsValidEmail(updateEmailDto.NewEmail))
+                {
+                    response.Success = false;
+                    response.Message = "Invalid email format.";
+                    return response;
+                }
+
+                var emailExists = await dbcontext.Users.AnyAsync(u => u.Email == updateEmailDto.NewEmail && u.Id != user.Id);
+                if (emailExists)
+                {
+                    response.Success = false;
+                    response.Message = "Email is already in use.";
+                    return response;
+                }
+
+                // Log the change
+                var log = new EmailChangeLog
+                {
+                    UserId = user.Id,
+                    OldEmail = user.Email,
+                    NewEmail = updateEmailDto.NewEmail,
+                    ChangedAt = DateTime.UtcNow,
+                    ChangedBy = "System/Admin" // You might want to pass the admin's ID here if available
+                };
+
+                await dbcontext.EmailChangeLogs.AddAsync(log);
+
+                // Update email
+                user.Email = updateEmailDto.NewEmail;
+                user.Password = null;
+                user.ForcePasswordChange = true;
+                user.UpdatedAt = DateTime.UtcNow;
+                dbcontext.Users.Update(user);
+
+                await dbcontext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                await _logServices.LogToDatabase("UpdateEmail", "Success", $"Email updated for user {user.Id}", JsonSerializer.Serialize(updateEmailDto));
+                
+                response.Success = true;
+                response.Message = "Email updated successfully.";
+                response.data = "Email updated successfully.";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                await _logServices.LogToDatabase("UpdateEmail", "Failure", ex.Message, JsonSerializer.Serialize(updateEmailDto));
+                response.Success = false;
+                response.Message = $"Failed to update email: {ex.Message}";
+                return response;
+            }
+        }
     }
 }

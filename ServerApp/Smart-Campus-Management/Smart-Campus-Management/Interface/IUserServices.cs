@@ -5,7 +5,6 @@ namespace Smart_Campus_Management.Interface
 {
     public interface IUserServices
     {
-        Task<User> UpdateUserAsync(Guid id, string User);
         Task<string> DeleteUserAsync(Guid id);
         Task<User?> FindUserAsync(Guid id);
         Task<User?> FindUserByEmailAsync(string email);
@@ -14,5 +13,8 @@ namespace Smart_Campus_Management.Interface
         Task<UploadResponseDTO> UploadStudentOrFaculty(UploadStudentorFacultyDTO UploadedData);
         Task<SignUpResponseDTO> SignUpStep1(userSignUpStep1DTO signUpData);
         Task<SignUpResponseDTO> SignUpStep2(userSignUpStep2DTO signUpData);
+        Task<ServiceResponse<User>> AddUser(Userdto userDto);
+        Task<ServiceResponse<string>> UpdateEmail(UpdateEmailDto updateEmailDto);
+        Task<ServiceResponse<User>> UpdateUserAsync(UpdateUserDto updateUserDto, UserRole requesterRole);
     }
 }

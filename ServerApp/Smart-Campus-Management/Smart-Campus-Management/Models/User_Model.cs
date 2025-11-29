@@ -35,6 +35,8 @@ namespace Smart_Campus_Management.Models
             public string? ProfilePicture { get; set; } = null;
             public Int64? MobileNumber { get; set; }
             public DateOnly? DOB { get; set; }
+            public bool ForcePasswordChange { get; set; }
+            
             [Required]
             [DatabaseGenerated(DatabaseGeneratedOption.Identity)] // Created once
             public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

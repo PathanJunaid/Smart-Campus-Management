@@ -23,23 +23,25 @@ namespace Smart_Campus_Management.Controllers
         // Update User
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] Namedto body)
+        public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserDto body)
         {
             try
             {
-                var result = await _userService.UpdateUserAsync(id, body.Name);
-                return Ok(new
+                // Extract role from claims
+                var roleClaim = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value;
+                if (!Enum.TryParse<UserRole>(roleClaim, out var requesterRole))
                 {
-                    data = new
-                    {
-                        id = result.Id,
-                        Name = result.FirstName,
-                        Email = result.Email,
-                        created_At = result.CreatedAt
-                    },
-                    message = "User Updated Successfully!",
-                    success = true
-                });
+                    return Unauthorized(new { message = "Invalid role claim", success = false });
+                }
+
+                var result = await _userService.UpdateUserAsync(body, requesterRole);
+                
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(result);
 
             }
             catch (Exception ex)
@@ -60,7 +62,7 @@ namespace Smart_Campus_Management.Controllers
                 {
                     throw new Exception("User not found");
                 }
-                return Ok(new { data = result, message = "User deleted Successfully!" });
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -282,6 +284,89 @@ namespace Smart_Campus_Management.Controllers
                     Errors = new List<string> { ex.Message }
                 };
                 return StatusCode(500, response);
+            }
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<User>> GetLoggedInUser()
+        {
+            ServiceResponse<User> response = new ServiceResponse<User>();
+            response.data = null;
+            try
+            {
+                var email = User?.FindFirst("email")?.Value
+                    ?? User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                if (string.IsNullOrEmpty(email))
+                {
+                    response.Message = "Invalid token!";
+                    response.data = null;
+                }
+                var user = await _userService.FindUserByEmailAsync(email);
+                if(user == null)
+                {
+                    response.Message = "User not found!";
+                    response.data = null;
+                }
+                else
+                {
+                    response.Success = true;
+                    response.Message = "Success";
+                    response.data = user;
+                }
+
+                return Ok(response);
+            }
+            catch(Exception ex)
+            {
+                response.Message = ex.Message;
+                return BadRequest(response);
+            }
+        }
+        [HttpPost("AddUser")]
+        [Authorize] // Assuming only authorized users (likely Admin) can add users directly
+        public async Task<IActionResult> AddUser([FromBody] Userdto userDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                var result = await _userService.AddUser(userDto);
+                if (!result.Success)
+                {
+                    return BadRequest(new { message = result.Message, success = false });
+                }
+                return Ok(new { data = result.data, message = result.Message, success = true });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, success = false });
+            }
+        }
+
+        [HttpPut("updateEmail")]
+        [Authorize]
+        public async Task<IActionResult> UpdateEmail([FromBody] UpdateEmailDto updateEmailDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                var result = await _userService.UpdateEmail(updateEmailDto);
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message, success = false });
             }
         }
     }
