@@ -5,7 +5,7 @@ import userService from '../../services/userService';
 import { setUser } from '../../store/authSlice';
 import { toast } from 'react-toastify';
 
-const UserProfile = ({ userId, initialData, onCancel }) => {
+const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -90,9 +90,14 @@ const UserProfile = ({ userId, initialData, onCancel }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({
+            ...prev,
+            [name]: name === "role" ? Number(value) : value
+        }));
         validateField(name, value);
     };
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -102,6 +107,8 @@ const UserProfile = ({ userId, initialData, onCancel }) => {
         const lastNameError = validateField("lastName", formData.lastName);
         const mobileError = validateField("mobileNumber", formData.mobileNumber);
         const dobError = validateField("dob", formData.dob);
+       
+        console.log(formData);
 
         if (firstNameError || lastNameError || mobileError || dobError) {
             return;
@@ -113,7 +120,15 @@ const UserProfile = ({ userId, initialData, onCancel }) => {
             if (response.success) {
                 toast.success(response.message || "Profile updated successfully");
                 // Update Redux state with the new user data
-                dispatch(setUser(response.data));
+
+                if (isFromAdminUser) {
+
+                    navigate("/dashboard/users");
+
+                } else {
+                    dispatch(setUser(response.data));
+
+                }
 
                 if (onCancel) {
                     onCancel(); // Switch back to view mode
@@ -218,6 +233,42 @@ const UserProfile = ({ userId, initialData, onCancel }) => {
                             />
                             {errors.dob && <div className="text-danger small mt-1">{errors.dob}</div>}
                         </div>
+
+                        <div className="form-group">
+                            <label htmlFor="role" className="form-label">Role</label>
+
+                            {isFromAdminUser ? (
+                                // ⭐ Admin can edit role
+                                <select
+                                    className="form-control"
+                                    id="role"
+                                    name="role"
+                                    value={formData.role}
+                                    onChange={handleChange}
+                                >
+                                    <option value={0}>Admin</option>
+                                    <option value={1}>Faculty</option>
+                                    <option value={2}>Student</option>
+                                </select>
+                            ) : (
+                                // ⭐ Normal user sees role only (readonly)
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="role"
+                                    name="role"
+                                    value={
+                                        formData.role === 0
+                                            ? "Admin"
+                                            : formData.role === 1
+                                                ? "Faculty"
+                                                : "Student"
+                                    }
+                                    disabled
+                                />
+                            )}
+                        </div>
+
 
                         {/* Actions */}
                     </div>
