@@ -10,9 +10,15 @@ const updateUser = async (id, userData) => {
     return res.data;
 };
 
+const getUsers = async (params) => {
+    const res = await API.get('/api/users', { params });
+    return res.data;
+};
+
 const userService = {
     getUserById,
-    updateUser
+    updateUser,
+    getUsers
 };
 
 export default userService;

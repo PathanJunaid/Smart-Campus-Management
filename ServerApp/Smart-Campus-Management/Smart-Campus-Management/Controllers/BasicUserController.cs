@@ -415,6 +415,11 @@ namespace Smart_Campus_Management.Controllers
                 return Ok(new 
                 { 
                     data = mappedData, 
+                    pageSize = result.data.PageSize,
+                    totalPage = result.data.TotalCount,
+                    PageNumber = result.data.PageIndex,
+                    hasNextPage = mappedData.HasNextPage,
+                    hasPreviousPage = result.data.HasPreviousPage,
                     message = result.Message, 
                     success = result.Success 
                 });

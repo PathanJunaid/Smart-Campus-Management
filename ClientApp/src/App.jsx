@@ -6,6 +6,7 @@ import './App.css'
 import AuthPage from './components/Auth/AuthPage'
 import FacultyDashboard from './components/FacultyControllers/FacultyDashboard'
 import StudentDashboard from './components/StudentControllers/StudentDashboard'
+import AdminDashboard from './components/AdminControllers/AdminDashboard'
 import ProtectedRoute from './components/ProtectedRoute';
 import { checkAuth } from './store/authSlice';
 import UserProfile from './components/UserProfile/UserProfile';
@@ -41,7 +42,7 @@ function App() {
         <ProtectedRoute>
           {user?.role === 2 && <StudentDashboard user={user} />}
           {user?.role === 1 && <FacultyDashboard user={user} />}
-          {/* {user?.role === 0 && <AdminDashboard user={user} />} */}
+          {user?.role === 0 && <AdminDashboard user={user} />}
         </ProtectedRoute>
       } />
 
