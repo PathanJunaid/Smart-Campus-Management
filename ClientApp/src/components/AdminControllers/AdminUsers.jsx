@@ -10,7 +10,12 @@ const AdminUsers = () => {
         isEdit: false,
         user: null
     });
-    console.log(isEdit);
+
+    const [isView, setIsView] = useState({
+        isView: false,
+        user: null
+    });
+
 
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -55,7 +60,7 @@ const AdminUsers = () => {
 
     useEffect(() => {
         fetchUsers();
-    }, [filters.pageNumber, filters.pageSize, filters.isActive, filters.role,isEdit.isEdit]);
+    }, [filters.pageNumber, filters.pageSize, filters.isActive, filters.role, isEdit.isEdit]);
 
     // Debounce search
     useEffect(() => {
@@ -95,20 +100,63 @@ const AdminUsers = () => {
         if (!dateString) return '-';
         return new Date(dateString).toLocaleDateString();
     };
+
+    const handleOnView = (user) => {
+        setIsView({
+            isView: true,
+            user
+        })
+    }
     const handleCancel = () => {
 
-  setIsEdit({
-    isEdit: false,
-    user: null
+        setIsEdit({
+            isEdit: false,
+            user: null
 
-  });
-  navigate("/dashboard/users");
-};
+        });
+        setIsView({
+            isView: false,
+            user: null
+        });
+
+
+        navigate("/dashboard/users");
+    };
     if (isEdit.isEdit) {
-    return <UserProfile userId={isEdit.user?.id} initialData={isEdit.user} onCancel={handleCancel} isFromAdminUser = {true}/>;
-    console.log(isEdit);
-    
-  }
+        return <UserProfile userId={isEdit.user?.id} initialData={isEdit.user} onCancel={handleCancel} isFromAdminUser={true} />;
+        console.log(isEdit);
+
+    }
+
+    if (isView.isView) {
+        return <UserProfile userId={isView.user?.id} initialData={isView.user} onCancel={handleCancel} isFromAdminUser={true} isViewMoode={true} />
+    }
+
+
+    const handleOnDelete = async (user) => {
+
+
+        if (!window.confirm(`Are you sure you want to delete ${user.firstName}?`)) return;
+
+        try {
+            const response = await userService.deleteUser(user.id);
+
+            console.log("DELETE RESPONSE:", response);
+
+            if (response.success) {
+                toast.success("User deleted successfully");
+                fetchUsers();
+
+            } else {
+                toast.error(response.message || "Failed to delete user");
+            }
+        } catch (e) {
+
+            toast.error("Delete failed");
+        }
+    };
+
+
 
     return (
         <div className="page-box">
@@ -204,13 +252,13 @@ const AdminUsers = () => {
                                         <td>{formatDate(user.dob)}</td>
                                         <td className="sticky-action">
                                             <div className="action-buttons">
-                                                <button className="btn-icon view" title="View">
+                                                <button className="btn-icon view" title="View" onClick={()=>handleOnView(user)}>
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                                 </button>
                                                 <button className="btn-icon edit" title="Edit" onClick={() => setIsEdit({ isEdit: true, user })}>
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                                                 </button>
-                                                <button className="btn-icon delete" title="Delete">
+                                                <button className="btn-icon delete" title="Delete" onClick={() => handleOnDelete(user)}>
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                                 </button>
                                             </div>

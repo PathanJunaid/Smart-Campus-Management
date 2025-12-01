@@ -5,7 +5,7 @@ import userService from '../../services/userService';
 import { setUser } from '../../store/authSlice';
 import { toast } from 'react-toastify';
 
-const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
+const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser, isViewMode }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -107,7 +107,7 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
         const lastNameError = validateField("lastName", formData.lastName);
         const mobileError = validateField("mobileNumber", formData.mobileNumber);
         const dobError = validateField("dob", formData.dob);
-       
+
         console.log(formData);
 
         if (firstNameError || lastNameError || mobileError || dobError) {
@@ -175,6 +175,7 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
                                 value={formData.firstName}
                                 onChange={handleChange}
                                 placeholder="Enter first name"
+                                disabled={isViewMode}
                             />
                             {errors.firstName && <div className="text-danger small mt-1">{errors.firstName}</div>}
                         </div>
@@ -189,6 +190,7 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
                                 value={formData.middleName}
                                 onChange={handleChange}
                                 placeholder="Enter middle name"
+                                disabled={isViewMode}
                             />
                         </div>
 
@@ -202,6 +204,7 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
                                 value={formData.lastName}
                                 onChange={handleChange}
                                 placeholder="Enter last name"
+                                disabled={isViewMode}
                             />
                             {errors.lastName && <div className="text-danger small mt-1">{errors.lastName}</div>}
                         </div>
@@ -217,6 +220,7 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
                                 value={formData.mobileNumber}
                                 onChange={handleChange}
                                 placeholder="Enter mobile number"
+                                disabled={isViewMode}
                             />
                             {errors.mobileNumber && <div className="text-danger small mt-1">{errors.mobileNumber}</div>}
                         </div>
@@ -230,6 +234,7 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
                                 name="dob"
                                 value={formData.dob}
                                 onChange={handleChange}
+                                disabled={isViewMode}
                             />
                             {errors.dob && <div className="text-danger small mt-1">{errors.dob}</div>}
                         </div>
@@ -237,7 +242,7 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
                         <div className="form-group">
                             <label htmlFor="role" className="form-label">Role</label>
 
-                            {isFromAdminUser ? (
+                            {isFromAdminUser && !isViewMode ? (
                                 // ⭐ Admin can edit role
                                 <select
                                     className="form-control"
@@ -245,6 +250,7 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
                                     name="role"
                                     value={formData.role}
                                     onChange={handleChange}
+
                                 >
                                     <option value={0}>Admin</option>
                                     <option value={1}>Faculty</option>
@@ -257,6 +263,7 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
                                     className="form-control"
                                     id="role"
                                     name="role"
+
                                     value={
                                         formData.role === 0
                                             ? "Admin"
@@ -283,13 +290,11 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser }) => {
                                 Cancel
                             </button>
                         )}
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={isSaving}
-                        >
-                            {isSaving ? 'Saving...' : 'Update Profile'}
-                        </button>
+                        {!isViewMode && (
+                            <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                                {isSaving ? "Saving..." : "Update Profile"}
+                            </button>
+                        )}
                     </div>
                 </form>
             </div>
