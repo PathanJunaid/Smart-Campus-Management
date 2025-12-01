@@ -1,5 +1,10 @@
 import { API } from "./api";
 
+const deleteUser = async (id) => {
+    const res = await API.delete(`/api/users/${id}`);
+    return res.data;
+}
+
 const getUserById = async (id) => {
     const res = await API.get(`/api/users/${id}`);
     return res.data;
@@ -15,10 +20,14 @@ const getUsers = async (params) => {
     return res.data;
 };
 
+
 const userService = {
     getUserById,
     updateUser,
-    getUsers
+    getUsers,
+    deleteUser
 };
+
+
 
 export default userService;
