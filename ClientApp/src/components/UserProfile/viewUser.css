@@ -1,0 +1,161 @@
+/* === OVERLAY === */
+.vu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+/* === MODAL BOX === */
+.vu-modal {
+    background: #fff;
+    width: 90%;
+    max-width: 850px;
+    border-radius: 12px;
+    overflow: hidden;
+    animation: vu-fade 0.25s ease-out;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+}
+
+/* === HEADER === */
+.vu-header {
+    background: #2db79a; /* Bootstrap primary blue */
+    color: white;
+    padding: 15px 20px;
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vu-close-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* === BODY === */
+.vu-body {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+/* LEFT SIDE */
+.vu-left {
+    width: 250px;
+    text-align: center;
+}
+
+.vu-avatar {
+    width: 130px;
+    height: 130px;
+    border-radius: 100%;
+    border: 3px solid #eee;
+    object-fit: cover;
+}
+
+.vu-name {
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+/* Role Badge */
+.vu-role {
+    display: inline-block;
+    padding: 7px 18px;
+    border-radius: 50px;
+    color: white;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.vu-admin {
+    background: #dc3545; /* red */
+}
+
+.vu-faculty {
+    background: #0d6efd; /* blue */
+}
+
+.vu-student {
+    background: #198754; /* green */
+}
+
+/* RIGHT SIDE */
+.vu-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ROWS */
+.vu-row {
+    display: flex;
+    /* justify-content: space-between; */
+    gap: 5px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.vu-label {
+    color: #555;
+    font-weight: 500;
+}
+
+.vu-value {
+    color: #222;
+    font-weight: 600;
+}
+
+/* === FOOTER === */
+.vu-footer {
+    padding: 15px 20px;
+    background: #f5f5f5;
+    text-align: right;
+}
+
+.vu-btn {
+    background: #6c757d;
+    color: white;
+    padding: 7px 24px;
+    border-radius: 6px;
+    border: none;
+    transition: 0.2s;
+}
+
+.vu-btn:hover {
+    background: #5a6268;
+}
+
+/* Animation */
+@keyframes vu-fade {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .vu-body {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .vu-right {
+        width: 100%;
+    }
+}
