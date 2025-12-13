@@ -7,6 +7,7 @@ namespace Smart_Campus_Management.Interface
     {
         Task<ServiceResponse<Enrollment_Model>> AddEnrollment(AddEnrollmentDTO Enroll);
         Task<bool> UpdateEnrollment(UpdateEnrollmentDTO Enroll);
+        Task<ServiceResponse<List<Enrollment_Model>>> EnrollUsers(EnrollUserRequestDto request);
 
     }
 }

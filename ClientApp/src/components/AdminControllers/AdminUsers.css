@@ -1,0 +1,407 @@
+/* AdminUsers.css - Final Polish: Calm, Premium, Readable */
+
+.admin-users-container {
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Card Structure --- */
+.users-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.users-card-header {
+    padding: 20px 15px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+
+/* --- Controls (Relaxed & Touch Friendly) --- */
+.search-input,
+.filter-select,
+.btn-add-user {
+    box-sizing: border-box;
+}
+
+.search-input {
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    padding: 6px 10px;
+    font-size: 14px;
+    color: #334155;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.search-input:focus {
+    border-color: #64748b;
+    /* Slate 500 */
+    box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
+    /* Subtle Slate Glow */
+    outline: none;
+}
+
+.filter-select {
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    padding: 6px 10px;
+    /* Comfortable padding */
+    font-size: 14px;
+    color: #334155;
+    cursor: pointer;
+    background-color: #ffffff;
+}
+
+.filter-select:focus {
+    border-color: #64748b;
+    box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
+    outline: none;
+}
+
+.btn-add-user {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 6px 10px;
+    background-color: #2DB79A;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+    text-wrap: nowrap;
+    margin-top: 0px;
+}
+
+.btn-add-user:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 4px 6px rgba(45, 183, 154, 0.4);
+}
+
+/* --- Table Styles --- */
+.table-container {
+    flex-grow: 1;
+    overflow: auto;
+    position: relative;
+}
+
+.premium-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    white-space: nowrap;
+}
+
+/* Header (Lighter & Cleaner) */
+.premium-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.premium-table th {
+    background-color: #475569;
+    /* Slate 600 - Lighter solid background */
+    color: #ffffff;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    padding: 18px 24px;
+    border-bottom: 1px solid #334155;
+    text-align: left;
+}
+
+/* Rows & Zebra Striping */
+.premium-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+/* Odd Rows: Pure White */
+.premium-table tbody tr:nth-child(odd) {
+    background-color: #ffffff;
+}
+
+/* Even Rows: Distinct Soft Grey */
+.premium-table tbody tr:nth-child(even) {
+    background-color: #f1f5f9;
+    /* Slate 100 - Stronger definition */
+}
+
+/* Row Hover */
+.premium-table tbody tr:hover {
+    background-color: #e2e8f0 !important;
+    /* Forces hover color over zebra */
+}
+
+.premium-table td {
+    padding: 18px 24px;
+    /* Slightly taller rows, relaxed */
+    vertical-align: middle;
+    border-bottom: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 0.95rem;
+}
+
+.user-name-text {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 1rem;
+}
+
+.email-text {
+    color: #64748b;
+}
+
+/* --- Role Badges --- */
+.role-badge {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    display: inline-block;
+}
+
+.role-0 {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.role-1 {
+    background-color: #f0fdf4;
+    color: #15803d;
+}
+
+.role-2 {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+/* --- Status (Refined: Active capital, Light Weight) --- */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95rem;
+    font-weight: 400;
+    /* Regular weight */
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+    text-transform: capitalize;
+    /* "Active" not "ACTIVE" - requires text to be lowercase in JS or handled here */
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: block;
+}
+
+.status-active {
+    color: #334155;
+    /* Neutral Dark Text */
+}
+
+.status-active .status-dot {
+    background-color: #10b981;
+    /* Emerald 500 */
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+}
+
+.status-inactive {
+    color: #94a3b8;
+    /* Slate 400 */
+}
+
+.status-inactive .status-dot {
+    background-color: #cbd5e1;
+    /* Slate 300 */
+}
+
+
+/* --- Action Column (Sticky & Clean) --- */
+.sticky-action {
+    position: sticky;
+    right: 0;
+    width: 180px;
+    text-align: center;
+    border-left: 1px solid #e2e8f0;
+    background-color: inherit;
+    /* Matches row bg */
+    z-index: 10;
+}
+
+.premium-table thead th.sticky-action {
+    background-color: #475569;
+    /* Match header */
+    border-left: 1px solid #334155;
+    z-index: 30;
+}
+
+/* Zebra fix for sticky column */
+.premium-table tbody tr:nth-child(odd) .sticky-action {
+    background-color: #ffffff;
+}
+
+.premium-table tbody tr:nth-child(even) .sticky-action {
+    background-color: #f1f5f9;
+}
+
+.premium-table tbody tr:hover .sticky-action {
+    background-color: #e2e8f0 !important;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* --- Action Buttons (Refined: Pastel BG, Clean Icons) --- */
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    border: 1px solid gray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+/* Remove White Stroke force, let color shine */
+.btn-icon svg {
+    stroke-width: 2;
+}
+
+.btn-icon.view svg {
+    stroke: #0284c7;
+}
+
+.btn-icon.view:hover {
+    background-color: #bae6fd;
+    /* Sky 200 */
+    transform: translateY(-1px);
+}
+
+.btn-icon.edit svg {
+    stroke: #059669;
+}
+
+.btn-icon.edit:hover {
+    background-color: #a7f3d0;
+    /* Emerald 200 */
+    transform: translateY(-1px);
+}
+
+
+.btn-icon.delete svg {
+    stroke: #dc2626;
+}
+
+.btn-icon.delete:hover {
+    background-color: #fecaca;
+    /* Red 200 */
+    transform: translateY(-1px);
+}
+
+
+/* --- Pagination (Integrated Block) --- */
+.pagination-container {
+    padding: 16px 32px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+}
+
+.pagination-info {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Right Side Group */
+.pagination-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.page-size-select {
+    height: 40px;
+    /* Match Buttons */
+    padding: 0 16px;
+    border-radius: 8px;
+    /* Rounded */
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    font-size: 14px;
+    cursor: pointer;
+    background-color: #fff;
+}
+
+.page-size-select:focus {
+    border-color: #cbd5e1;
+    outline: none;
+}
+
+.btn-page {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    /* Rounded */
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-page:not(:disabled):hover {
+    background-color: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+
+.btn-page:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f8fafc;
+}
+
+/* Scrollbar */
+.table-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+}

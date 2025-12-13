@@ -6,7 +6,7 @@ namespace Smart_Campus_Management.Models
         public enum UserRole
         {
             Admin,
-            Faculty,
+            Professor,
             Student
         }
         public enum Departments
@@ -44,9 +44,9 @@ namespace Smart_Campus_Management.Models
 
             public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
             
-            public Departments? Department { get; set; }
+            public ICollection<Department_Model>? Departments { get; set; }
             public ICollection<Enrollment_Model> Enrollments { get; set; }
 
     }
-    }
+}
 

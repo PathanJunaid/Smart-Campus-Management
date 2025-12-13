@@ -19,12 +19,10 @@ namespace Smart_Campus_Management.DTO
         [Required]
         [StringLength(100, ErrorMessage = "Department name can't exceed 100 characters.")]
         public string DepartmentName { get; set; }
-
         [StringLength(200)]
         public string? DepartmentDescription { get; set; }
-
+        public int AcademicYear { get; set; }
         public bool DepartmentStatus { get; set; } = true;
-
         public int FacultyId { get; set; } 
     }
 }

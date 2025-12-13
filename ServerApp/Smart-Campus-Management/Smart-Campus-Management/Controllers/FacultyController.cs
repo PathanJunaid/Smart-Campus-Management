@@ -97,12 +97,28 @@ namespace Smart_Campus_Management.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllFaculties()
+        public async Task<IActionResult> GetAllFaculties([FromQuery] string? search, [FromQuery] int pageSize = 15, [FromQuery] int pageNumber = 1)
         {
             try
             {
-                var faculties = await _facultyService.GetAllFacultiesAsync();
-                return Ok(faculties);
+                var result = await _facultyService.GetAllFacultiesAsync(search, pageNumber, pageSize);
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                return Ok(new
+                {
+                    data = result.data,
+                    pageSize = result.data.PageSize,
+                    totalPage = result.data.TotalPages,
+                    totalCount = result.data.TotalCount,
+                    PageNumber = result.data.PageIndex,
+                    hasNextPage = result.data.HasNextPage,
+                    hasPreviousPage = result.data.HasPreviousPage,
+                    message = result.Message,
+                    success = result.Success
+                });
             }
             catch (Exception ex)
             {

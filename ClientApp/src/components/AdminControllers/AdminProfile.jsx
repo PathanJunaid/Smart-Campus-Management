@@ -26,9 +26,7 @@ export default function AdminProfile({ editMode = false }) {
     return (
         <div className="page-box">
             <div className="card-container">
-                <div className="card-header">
-                    <h3 className="card-title">Admin Profile</h3>
-                </div>
+
 
                 <div className="profile-grid">
                     {/* Left Column: Avatar & Status */}

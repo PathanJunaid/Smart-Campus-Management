@@ -16,6 +16,8 @@ namespace Smart_Campus_Management.Models
         public Guid StudentId { get; set; }
         public EnrollmentStatus EnrollmentStatus { get; set; } = EnrollmentStatus.Active;
         public int DepartmentId { get; set; }
+        public DateTime EffectiveFrom { get; set; }
+        public DateTime EffectiveTo { get; set; }
         [ForeignKey("DepartmentId")]
         public Department_Model Departments { get; set; }
         [ForeignKey("StudentId")]

@@ -2,6 +2,7 @@
 using Smart_Campus_Management.DTO;
 using Smart_Campus_Management.Interface;
 using Smart_Campus_Management.Models;
+using Smart_Campus_Management.Helpers;
 
 namespace Smart_Campus_Management.Services
 {
@@ -112,16 +113,37 @@ namespace Smart_Campus_Management.Services
         }
 
         // Get All Active Faculty
-        public async Task<List<Faculty_Model>> GetAllFacultiesAsync()
+        // Get All Active Faculty
+        public async Task<ServiceResponse<PaginatedList<Faculty_Model>>> GetAllFacultiesAsync(string? search, int pageNumber = 1, int pageSize = 15)
         {
+            var response = new ServiceResponse<PaginatedList<Faculty_Model>>();
             try
             {
-                return await _context.Faculty.Where(f => f.IsActive).ToListAsync();
+                var query = _context.Faculty.Include(f => f.Departments).Where(f => f.IsActive).AsQueryable();
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    var terms = search.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var term in terms)
+                    {
+                        query = query.Where(f => f.FacultyName.ToLower().Contains(term) || (f.FacultyDescription != null && f.FacultyDescription.ToLower().Contains(term)));
+                    }
+                }
+
+                var paginatedFaculties = await PaginatedList<Faculty_Model>.CreateAsync(query, pageNumber, pageSize);
+                
+                response.Success = true;
+                response.Message = "Faculties retrieved successfully.";
+                response.data = paginatedFaculties;
+                return response;
             }
             catch (Exception ex)
             {
                 await _logService.LogToDatabase("GetAllFaculties", "Error", ex.Message, "{}");
-                return new List<Faculty_Model>();
+                response.Success = false;
+                response.Message = $"Failed to retrieve faculties: {ex.Message}";
+                return response;
             }
         }
     }
