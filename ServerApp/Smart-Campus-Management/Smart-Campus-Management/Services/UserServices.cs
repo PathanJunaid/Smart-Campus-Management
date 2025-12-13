@@ -57,9 +57,9 @@ namespace Smart_Campus_Management.Services
                 };
 
                 // Validate role
-                if (UploadedData.Role != UserRole.Student && UploadedData.Role != UserRole.Faculty)
+                if (UploadedData.Role != UserRole.Student && UploadedData.Role != UserRole.Professor)
                 {
-                    var error = "Invalid role. Only Student or Faculty roles are allowed.";
+                    var error = "Invalid role. Only Student or Professor roles are allowed.";
                     await _logServices.LogToDatabase("UserImport", "Failure", error, "{}");
                     response.Errors.Add(error);
                     response.Message = "Upload failed";
@@ -188,14 +188,8 @@ namespace Smart_Campus_Management.Services
                                             user.Role = role;
                                         }
                                         break;
-                                    case "department":
-                                        if (Enum.TryParse<Departments>(cellValue, true, out var department) && user.Role == UserRole.Faculty)
-                                        {
-                                            user.Department = department;
-                                        }
-                                        break;
                                     case "employeeid":
-                                        if (int.TryParse(cellValue, out int employeeId) && user.Role == UserRole.Faculty)
+                                        if (int.TryParse(cellValue, out int employeeId) && user.Role == UserRole.Professor)
                                         {
                                             user.EmployeeId = employeeId;
                                         }
@@ -618,26 +612,54 @@ namespace Smart_Campus_Management.Services
             }
         }
 
-        public async Task<string> DeleteUserAsync(Guid id)
+        public async Task<ServiceResponse<string>> DeleteUserAsync(Guid id)
         {
+            ServiceResponse<string> response = new ServiceResponse<string>();
+            response.Success = false;
             try
             {
                 var user = await FindUserAsync(id);
                 if (user == null)
                 {
-                    throw new Exception("User not found!");
+                    response.Message = "User not found!";
                 }
                 user.Active = false;
                 dbcontext.Users.Update(user);
                 await dbcontext.SaveChangesAsync();
-                return $"User {user.Email} deleted successfully.";
+                response.Success = true;
+                response.Message = $"User {user.Email} deleted successfully.";
             }
             catch (Exception ex)
             {
-                throw new Exception("Delete failed!", ex);
+                response.Message = $"Delete failed: {ex.Message}";
             }
-
+            return response;
         }
+
+        public async Task<ServiceResponse<string>> RevokeUserAsync(Guid id)
+        {
+            ServiceResponse<string> response = new ServiceResponse<string>();
+            response.Success = false;
+            try
+            {
+                var user = await FindUserAsync(id);
+                if (user == null)
+                {
+                    response.Message = "User not found!";
+                }
+                user.Active = true;
+                dbcontext.Users.Update(user);
+                await dbcontext.SaveChangesAsync();
+                response.Success = true;
+                response.Message = $"User {user.Email} revoked successfully.";
+            }
+            catch (Exception ex)
+            {
+                response.Message = $"Revoked failed: {ex.Message}";
+            }
+            return response;
+        }
+
         public async Task<User?> FindUserByEmailAsync(string email)
         {
             try
@@ -853,7 +875,7 @@ namespace Smart_Campus_Management.Services
                 }
 
                 // Check role (Only Student and Faculty can have email updated via this API as per requirement)
-                if (user.Role != UserRole.Student && user.Role != UserRole.Faculty)
+                if (user.Role != UserRole.Student && user.Role != UserRole.Professor)
                 {
                     response.Success = false;
                     response.Message = "Email update is only allowed for Students and Faculty.";
@@ -915,7 +937,7 @@ namespace Smart_Campus_Management.Services
             }
         }
 
-        public async Task<ServiceResponse<PaginatedList<User>>> GetAllUsersAsync(string? search, UserRole? role, bool isActive = true, int pageNumber = 1, int pageSize = 30)
+        public async Task<ServiceResponse<PaginatedList<User>>> GetAllUsersAsync(string? search, UserRole? role, bool? isActive = true, int pageNumber = 1, int pageSize = 30)
         {
             var response = new ServiceResponse<PaginatedList<User>>();
             try
@@ -923,7 +945,10 @@ namespace Smart_Campus_Management.Services
                 var query = dbcontext.Users.AsQueryable();
 
                 // Filter by Active status
-                query = query.Where(u => u.Active == isActive);
+                if (isActive.HasValue)
+                {
+                    query = query.Where(u => u.Active == isActive.Value);
+                }
 
                 // Filter by Role if provided
                 if (role.HasValue)
@@ -934,14 +959,17 @@ namespace Smart_Campus_Management.Services
                 // Filter by Search term if provided
                 if (!string.IsNullOrEmpty(search))
                 {
-                    search = search.ToLower();
-                    query = query.Where(u => 
-                        u.Email.ToLower().Contains(search) ||
-                        u.FirstName.ToLower().Contains(search) ||
-                        (u.MiddleName != null && u.MiddleName.ToLower().Contains(search)) ||
-                        (u.LastName != null && u.LastName.ToLower().Contains(search)) ||
-                        (u.MobileNumber != null && u.MobileNumber.ToString().Contains(search))
-                    );
+                    var terms = search.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var term in terms)
+                    {
+                        query = query.Where(u =>
+                            u.FirstName.ToLower().Contains(term) ||
+                            (u.MiddleName != null && u.MiddleName.ToLower().Contains(term)) ||
+                            (u.LastName != null && u.LastName.ToLower().Contains(term)) ||
+                            u.Email.ToLower().Contains(term)
+                        );
+                    }
                 }
 
                 var paginatedUsers = await PaginatedList<User>.CreateAsync(query, pageNumber, pageSize);

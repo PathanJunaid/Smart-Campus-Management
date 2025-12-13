@@ -96,6 +96,7 @@ namespace Smart_Campus_Management.Services
                 department.DepartmentDescription = model.DepartmentDescription ?? "";
                 department.DepartmentStatus = model.DepartmentStatus;
                 department.FacultyId = model.FacultyId;
+                department.AcademicYear = model.AcademicYear;
                 department.UpdatedAt = DateTime.UtcNow;
 
                 _context.Departments.Update(department);

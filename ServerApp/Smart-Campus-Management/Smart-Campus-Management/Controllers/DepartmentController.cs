@@ -52,7 +52,6 @@ namespace Smart_Campus_Management.Controllers
             }
         }
 
-        // ✅ READ BY ID - All Authenticated Users
         [HttpGet("{id}")]
         [Authorize] // Any authenticated role can access
         public async Task<IActionResult> GetDepartmentById(int id)
@@ -71,7 +70,6 @@ namespace Smart_Campus_Management.Controllers
             }
         }
 
-        // ✅ UPDATE - Admin Only
         [HttpPut("update/{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateDepartment(int id, [FromBody] UpdateDepartmentDTO model)
@@ -80,17 +78,15 @@ namespace Smart_Campus_Management.Controllers
             {
                 var updated = await _departmentServices.UpdateDepartment(id, model);
                 if (updated == null)
-                    return NotFound(new { message = $"Department with ID {id} not found or update failed." });
-
+                    return NotFound(new { success = false, message = $"Department with ID {id} not found or update failed." });
                 return Ok(updated);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Failed to update department", error = ex.Message });
+                return StatusCode(500, new {success = false, message = "Failed to update department", error = ex.Message });
             }
         }
 
-        // ✅ DELETE - Admin Only
         [HttpDelete("delete/{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteDepartment(int id)

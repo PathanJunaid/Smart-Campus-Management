@@ -54,7 +54,14 @@ export default function Sidebar({ title, menuItems }) {
                         <li
                             key={item.name}
                             className={`menu-item ${isActive(item.path) ? "active" : ""}`}
-                            onClick={() => navigate(item.path)}
+                            onClick={() => {
+                                if (isActive(item.path)) {
+                                    // Force refresh if already active
+                                    navigate(item.path, { state: { refresh: Date.now() }, replace: true });
+                                } else {
+                                    navigate(item.path);
+                                }
+                            }}
                             data-tooltip={item.name}
                         >
                             <div className="menu-icon">

@@ -121,6 +121,9 @@ namespace Smart_Campus_Management.DTO
         public DateOnly? DOB { get; set; }
         public long? MobileNumber { get; set; }
         public string? ProfilePicture { get; set; }
+        public bool Active { get; set; }
+        public int DepartmentId { get; set; }
+        public int FacultyId { get; set; }
     }
 
 }

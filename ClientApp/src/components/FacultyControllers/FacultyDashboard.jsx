@@ -22,7 +22,7 @@ export default function FacultyDashboard() {
 
   return (
     <div className="dashboard-container">
-      <Sidebar title="Faculty Panel" menuItems={menuItems} />
+      <Sidebar title="Professor Panel" menuItems={menuItems} />
       <main className="main-content">
         <FacultyTopbar title="Dashboard" user={user} />
         <Routes>

@@ -3,7 +3,7 @@ import React from "react";
 export default function FacultyTopbar({ title, user }) {
   const fullName = user
     ? [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" ")
-    : "Faculty Name";
+    : "Professor Name";
   const encodedName = encodeURIComponent(fullName || "User");
 
   // Generate avatar link using initials

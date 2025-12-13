@@ -40,6 +40,7 @@ namespace Smart_Campus_Management.Controllers
                 DOB = user.DOB,
                 MobileNumber = user.MobileNumber,
                 ProfilePicture = user.ProfilePicture,
+                Active = user.Active,
             };
         }
 
@@ -80,7 +81,7 @@ namespace Smart_Campus_Management.Controllers
 
         // Delete User
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize (Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
             try
@@ -90,6 +91,22 @@ namespace Smart_Campus_Management.Controllers
                 {
                     throw new Exception("User not found");
                 }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { data = (object)null, message = "User not found!", success = false });
+            }
+
+        }
+
+        [HttpPatch("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RevokeUser(Guid id)
+        {
+            try
+            {
+                var result = await _userService.RevokeUserAsync(id);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -394,7 +411,7 @@ namespace Smart_Campus_Management.Controllers
         /// <returns>List of users matching the criteria.</returns>
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> GetAllUsers([FromQuery] string? search, [FromQuery] UserRole? role, [FromQuery] bool isActive = true, int PageSize = 30, int PageNumber = 1)
+        public async Task<IActionResult> GetAllUsers([FromQuery] string? search, [FromQuery] UserRole? role, [FromQuery] bool? isActive = true, int PageSize = 30, int PageNumber = 1)
         {
             try
             {
@@ -416,7 +433,8 @@ namespace Smart_Campus_Management.Controllers
                 { 
                     data = mappedData, 
                     pageSize = result.data.PageSize,
-                    totalPage = result.data.TotalCount,
+                    totalPage = result.data.TotalPages,
+                    totalCount = result.data.TotalCount,
                     PageNumber = result.data.PageIndex,
                     hasNextPage = mappedData.HasNextPage,
                     hasPreviousPage = result.data.HasPreviousPage,

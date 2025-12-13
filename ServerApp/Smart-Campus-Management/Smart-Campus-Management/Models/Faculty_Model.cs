@@ -13,5 +13,6 @@ namespace Smart_Campus_Management.Models
         public bool IsActive { get; set; } = true;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; set; }
+        public ICollection<Department_Model>? Departments { get; set; }
     }
 }

@@ -82,5 +82,78 @@ namespace Smart_Campus_Management.Services
                 throw ex;
             }
         }
+
+        public async Task<ServiceResponse<List<Enrollment_Model>>> EnrollUsers(EnrollUserRequestDto request)
+        {
+            var response = new ServiceResponse<List<Enrollment_Model>>();
+            var enrolledUsers = new List<Enrollment_Model>();
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var department = await _context.Departments.FindAsync(request.DepartmentId);
+                if (department == null)
+                {
+                    response.Success = false;
+                    response.Message = "Department not found.";
+                    return response;
+                }
+
+                var effectiveTo = request.EffectiveFrom.AddYears(department.AcademicYear);
+
+                foreach (var userId in request.UserIds)
+                {
+                    var user = await _context.Users.FindAsync(userId);
+                    if (user == null || !user.Active)
+                    {
+                        continue;
+                    }
+
+                    bool isDuplicate = await _context.Enrollments.AnyAsync(e =>
+                        e.StudentId == userId &&
+                        e.DepartmentId == request.DepartmentId &&
+                        e.EnrollmentStatus == EnrollmentStatus.Active &&
+                        ((request.EffectiveFrom >= e.EffectiveFrom && request.EffectiveFrom < e.EffectiveTo) ||
+                         (effectiveTo > e.EffectiveFrom && effectiveTo <= e.EffectiveTo) ||
+                         (request.EffectiveFrom <= e.EffectiveFrom && effectiveTo >= e.EffectiveTo))
+                    );
+
+                    if (isDuplicate)
+                    {
+                        continue;
+                    }
+
+                    var enrollment = new Enrollment_Model
+                    {
+                        StudentId = userId,
+                        DepartmentId = request.DepartmentId,
+                        EffectiveFrom = request.EffectiveFrom,
+                        EffectiveTo = effectiveTo,
+                        EnrollmentStatus = EnrollmentStatus.Active,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+
+                    await _context.Enrollments.AddAsync(enrollment);
+                    enrolledUsers.Add(enrollment);
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                response.Success = true;
+                response.Message = $"Enrolled {enrolledUsers.Count} users successfully.";
+                response.data = enrolledUsers;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                await _logger.LogToDatabase("Enrollment", ErrorName.Failure.ToString(), ex.Message, JsonSerializer.Serialize(request));
+                response.Success = false;
+                response.Message = $"Failed to enroll users: {ex.Message}";
+            }
+
+            return response;
+        }
     }
 }

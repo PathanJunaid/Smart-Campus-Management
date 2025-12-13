@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Smart_Campus_Management;
 
@@ -11,9 +12,11 @@ using Smart_Campus_Management;
 namespace Smart_Campus_Management.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251130092343_Faculty Model Update")]
+    partial class FacultyModelUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,17 +57,12 @@ namespace Smart_Campus_Management.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DepartmentName")
                         .IsUnique();
 
                     b.HasIndex("FacultyId");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Departments");
                 });
@@ -112,12 +110,6 @@ namespace Smart_Campus_Management.Migrations
 
                     b.Property<int>("DepartmentId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("EffectiveFrom")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("EffectiveTo")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("EnrollmentStatus")
                         .HasColumnType("int");
@@ -242,6 +234,9 @@ namespace Smart_Campus_Management.Migrations
                     b.Property<DateOnly?>("DOB")
                         .HasColumnType("date");
 
+                    b.Property<int?>("Department")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -296,10 +291,6 @@ namespace Smart_Campus_Management.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Smart_Campus_Management.Models.User", null)
-                        .WithMany("Departments")
-                        .HasForeignKey("UserId");
-
                     b.Navigation("Faculty");
                 });
 
@@ -334,8 +325,6 @@ namespace Smart_Campus_Management.Migrations
 
             modelBuilder.Entity("Smart_Campus_Management.Models.User", b =>
                 {
-                    b.Navigation("Departments");
-
                     b.Navigation("Enrollments");
                 });
 #pragma warning restore 612, 618

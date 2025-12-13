@@ -7,7 +7,8 @@ namespace Smart_Campus_Management.Interface
 {
     public interface IUserServices
     {
-        Task<string> DeleteUserAsync(Guid id);
+        Task<ServiceResponse<string>> DeleteUserAsync(Guid id);
+        Task<ServiceResponse<string>> RevokeUserAsync(Guid id);
         Task<User?> FindUserAsync(Guid id);
         Task<User?> FindUserByEmailAsync(string email);
         bool VerifyPassword(string enteredPassword, string storedHashedPassword);
@@ -18,6 +19,6 @@ namespace Smart_Campus_Management.Interface
         Task<ServiceResponse<User>> AddUser(Userdto userDto);
         Task<ServiceResponse<string>> UpdateEmail(UpdateEmailDto updateEmailDto);
         Task<ServiceResponse<User>> UpdateUserAsync(UpdateUserDto updateUserDto, UserRole requesterRole);
-        Task<ServiceResponse<PaginatedList<User>>> GetAllUsersAsync(string? search, UserRole? role, bool isActive = true, int pageNumber = 1, int pageSize = 30);
+        Task<ServiceResponse<PaginatedList<User>>> GetAllUsersAsync(string? search, UserRole? role, bool? isActive = true, int pageNumber = 1, int pageSize = 30);
     }
 }
