@@ -839,6 +839,7 @@ namespace Smart_Campus_Management.Services
                     Active = true,
                     MobileNumber = userDto.MobileNumber,
                     RollNo = userDto.RollNo,
+                    DOB = userDto.DOB,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };

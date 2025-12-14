@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "../Common/Sidebar";
-import FacultyTopbar from "./FacultyTopbar";
+import FacultyTopbar from "../Common/Header";
 import FacultyHome from "./FacultyHome";
 import FacultyAttendance from "./FacultyAttendance";
 import FacultyCourses from "./FacultyCourses";

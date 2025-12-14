@@ -4,7 +4,7 @@ import React from "react";
 export default function Topbar({ title }) {
   return (
     <div className="topbar">
-      <h2>{title}</h2>
+      <h4>{title}</h4>
       <div className="student-info">
         <img
           src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"

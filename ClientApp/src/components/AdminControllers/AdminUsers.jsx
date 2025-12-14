@@ -164,7 +164,7 @@ const AdminUsers = () => {
                         <div className="d-flex gap-3 align-items-center w-100 flex-wrap">
 
                             {/* Search */}
-                            <div className="flex-grow-1" style={{ minWidth: '250px' }}>
+                            <div className="">
                                 <input
                                     type="text"
                                     name="search"

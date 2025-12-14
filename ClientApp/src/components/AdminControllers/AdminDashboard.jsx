@@ -1,14 +1,14 @@
 import React from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Sidebar from "../Common/Sidebar";
-import FacultyTopbar from "../FacultyControllers/FacultyTopbar"; // Reusing Topbar as requested
+import FacultyTopbar from "../Common/Header"; // Reusing Topbar as requested
 import AdminUsers from "./AdminUsers";
 import AdminFaculty from "./AdminFaculty";
 import { useSelector } from 'react-redux';
 
 import AdminProfile from "./AdminProfile";
 import UserProfile from "../UserProfile/UserProfile";
-import ViewUser from "../UserProfile/ViewUser";
+import Footer from "../Common/Footer";
 
 // Placeholder components for other routes
 const AdminHome = () => <div className="page-box"><div className="card-container"><p>Welcome to the Admin Panel.</p></div></div>;
@@ -56,6 +56,7 @@ export default function AdminDashboard() {
                     <Route path="profile/edit" element={<AdminProfile editMode={true} />} />
                     <Route path="*" element={<Navigate to="" replace />} />
                 </Routes>
+                <Footer />
             </main>
         </div>
     );

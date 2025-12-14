@@ -30,14 +30,21 @@ namespace Smart_Campus_Management.Controllers
             {
                 var result = await _facultyService.AddFacultyAsync(facultyDto);
                 if (result == null)
-                    return StatusCode(500, "Failed to add faculty.");
+                    return StatusCode(400, new {
+                        message = "Failed to add Faculty.",
+                        success = false
+                    });
 
-                return Ok(new { message = "Faculty added successfully.", faculty = result });
+                return Ok(new { message = "Faculty added successfully.", faculty = result, success = true });
             }
             catch (Exception ex)
             {
                 await _logService.LogToDatabase("AddFaculty", "Error", ex.Message, "{}");
-                return StatusCode(500, "Internal server error.");
+                return StatusCode(400, new
+                {
+                    message = "Failed to add Faculty.",
+                    success = false
+                });
             }
         }
 

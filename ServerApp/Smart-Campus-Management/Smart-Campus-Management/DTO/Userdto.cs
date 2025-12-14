@@ -53,7 +53,7 @@ namespace Smart_Campus_Management.DTO
         [RegularExpression(@"^[1-9][0-9]{9}$", ErrorMessage = "Mobile number must be 10 digits and cannot start with 0.")]
         public long? MobileNumber { get; set; }
         public UserRole Role { get; set; } = UserRole.Student;
-
+        public DateOnly DOB { get; set; }
     }
     public class Logindto
     {
