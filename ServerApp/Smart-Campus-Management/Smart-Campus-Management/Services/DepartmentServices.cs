@@ -34,7 +34,8 @@ namespace Smart_Campus_Management.Services
                     DepartmentDescription = model.DepartmentDescription ?? "",
                     DepartmentStatus = true,
                     CreatedAt = DateTime.UtcNow,
-                    FacultyId = model.FacultyId
+                    FacultyId = model.FacultyId,
+                    AcademicYear = model.AcademicYear
                 };
 
                 await _context.Departments.AddAsync(department);
