@@ -16,7 +16,9 @@ const AdminUsers = () => {
     // Only for delete modal which is a partial action, not a page
     const [confirmDelete, setConfirmDelete] = useState({
         visible: false,
-        user: null
+        name: null,
+        topic: null,
+        id: null
     });
 
     const [users, setUsers] = useState([]);
@@ -120,15 +122,19 @@ const AdminUsers = () => {
     // -- Delete Logic --
     // Delete is small enough to stay as a modal on the table
     const handleConfirmDelete = (user) => {
+        var name = [user.firstName, user.middleName, user.lastName].filter(Boolean).join(' ');
+        var topic = "user";
         setConfirmDelete({
             visible: true,
-            user
+            name: name,
+            id: user.id,
+            topic: topic
         });
     }
 
-    const handleOnDelete = async (user) => {
+    const handleOnDelete = async (id) => {
         try {
-            const response = await userService.deleteUser(user.id);
+            const response = await userService.deleteUser(id);
             if (response.success) {
                 toast.success("User deleted successfully");
                 fetchUsers();
@@ -152,9 +158,11 @@ const AdminUsers = () => {
                 {/* Delete Modal - Kept local as it's a confirmation, not a page */}
                 {confirmDelete.visible && (
                     <ConfirmModal
-                        user={confirmDelete.user}
+                        name={confirmDelete.name}
+                        topic={confirmDelete.topic}
+                        id={confirmDelete.id}
                         onConfirm={handleOnDelete}
-                        onCancel={() => setConfirmDelete({ visible: false, user: null })}
+                        onCancel={() => setConfirmDelete({ visible: false, id: null, name: null, topic: null })}
                     />
                 )}
 

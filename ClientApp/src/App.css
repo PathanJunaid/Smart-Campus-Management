@@ -105,6 +105,11 @@ h6 {
   gap: 8px;
 }
 
+.btn-check:checked+.btn, .btn.active, .btn.show, .btn:first-child:active, :not(.btn-check)+.btn:active
+ {
+    color: var(--bs-btn-active-color) !important;
+    background-color: var(--accent) !important;
+}
 .btn-primary {
   background: var(--accent);
   color: white;
