@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
 import ConfirmModal from '../UserProfile/ConfirmModal';
 import ViewUser from '../UserProfile/ViewUser';
+import UserProfile from '../UserProfile/UserProfile';
 import { useSelector } from 'react-redux';
 import './AdminUsers.css'; // Re-import Enterprise styles
 
@@ -172,7 +173,7 @@ const AdminUsers = () => {
                         <div className="d-flex gap-3 align-items-center w-100 flex-wrap">
 
                             {/* Search */}
-                            <div className="flex-grow-1" style={{ minWidth: '250px' }}>
+                            <div className="">
                                 <input
                                     type="text"
                                     name="search"
@@ -304,11 +305,11 @@ const AdminUsers = () => {
                                 value={filters.pageSize}
                                 onChange={handleFilterChange}
                             >
-                                <option value="7">7 / page</option>
-                                <option value="15">15 / page</option>
-                                <option value="30">30 / page</option>
-                                <option value="50">50 / page</option>
-                                <option value="100">100 / page</option>
+                                <option value="7">7</option>
+                                <option value="15">15</option>
+                                <option value="30">30</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
                             </select>
 
                             <div className="d-flex gap-2">
@@ -338,6 +339,29 @@ const AdminUsers = () => {
 
             <Routes>
                 <Route path="view/:id" element={<ViewUser onClose={() => navigate('/dashboard/users')} />} />
+                <Route path="add" element={
+                    <UserProfile
+                        mode="add"
+                        isFromAdminUser={true}
+                        isModal={true}
+                        onClose={() => {
+                            // Refresh list if needed (handled by useEffect dependency on location or explicit refresh)
+                            fetchUsers();
+                            navigate('/dashboard/users');
+                        }}
+                    />
+                } />
+                <Route path="edit/:id" element={
+                    <UserProfile
+                        mode="edit"
+                        isFromAdminUser={true}
+                        isModal={true}
+                        onClose={() => {
+                            fetchUsers();
+                            navigate('/dashboard/users');
+                        }}
+                    />
+                } />
             </Routes>
         </>
     );

@@ -1,63 +1,74 @@
 # Smart Campus Management System
 
-A full-stack web application designed to streamline college and school operations. This project showcases modern web development practices and includes features for user management, course scheduling, attendance, assignments, real-time chat, and analytics.
+A full-stack web application designed to streamline college and school operations. This project showcases modern web development practices and includes features for user management, course scheduling, and administration.
 
-**Note:** This project is currently in active development.
+> **Note:** This project is currently in active development.
 
 ---
 
-## ✨ Features
+## ✨ Functionality
 
--   **Role-Based Access Control**: Separate dashboards and permissions for Admins, Faculty, and Students using JWT authentication.
--   **Course & Attendance Management**: Faculty can create courses and track student attendance.
--   **Assignment Submissions**: Seamless file uploads for assignments and submissions.
--   **Real-Time Chat**: Direct student-faculty communication powered by SignalR.
--   **Admin Dashboard**: Visualize campus analytics like attendance and user activity.
--   **Notifications**: Automated email and push notifications for important events.
+### Currently Implemented
+-   **Role-Based Authentication**: Separate secure login and dashboards for **Admins**, **Faculty**, and **Students**.
+-   **Admin Dashboard**: comprehensive overview of campus metrics.
+-   **User Management**: Complete control to Add, Edit, and View Users (Students, Faculty, Admins).
+-   **Faculty & Department Management**: Organize the campus structure with Faculties and their respective Departments.
+-   **Enrollment**: Backend logic for enrolling users into courses/departments (UI in progress).
+
+### Future Roadmap
+-   **Real-Time Chat**: Direct communication platform for students and faculty.
+-   **Assignment Submission**: Digital portal for assignment uploads and grading.
+-   **Attendance System**: Automated and manual attendance tracking.
+-   **File Storage Integration**: Cloud or local storage for user documents and media.
 
 ---
 
 ## 🛠️ Tech Stack
 
--   **Frontend**: Angular 17+, Angular Material, Tailwind CSS, RxJS
--   **Backend**: ASP.NET Core 8 Web API, Entity Framework Core, SignalR
+### Frontend
+-   **Framework**: [React](https://react.dev/)
+-   **Build Tool**: [Vite](https://vitejs.dev/)
+-   **State Management**: [Redux Toolkit](https://redux-toolkit.js.org/)
+-   **Styling**: Vanilla CSS (Custom Design System)
+-   **Routing**: React Router DOM
+
+### Backend
+-   **Framework**: [ASP.NET Core Web API](https://dotnet.microsoft.com/) (.NET 8)
 -   **Database**: SQL Server
--   **File Storage**: Azure Blob Storage
--   **Authentication**: JWT (JSON Web Tokens)
--   **DevOps**: GitHub Actions for CI/CD
+-   **ORM**: Entity Framework Core
+-   **Authentication**: JWT with HttpOnly Cookies
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-
 -   Node.js (v18+)
 -   .NET SDK (8.0)
--   SQL Server (for local development)
+-   SQL Server (Local or Remote)
 -   Git
 
 ### Setup Instructions
 
 1.  **Clone the Repository**
     ```bash
-    git clone [https://github.com/PathanJunaid/Smart-Campus-Management.git](https://github.com/PathanJunaid/Smart-Campus-Management.git)
+    git clone https://github.com/PathanJunaid/Smart-Campus-Management.git
     cd Smart-Campus-Management
     ```
 
 2.  **Backend Setup (`/ServerApp`)**
     ```bash
-    # Navigate to the backend folder
-    cd ServerApp
+    # Navigate to the project directory
+    cd ServerApp/Smart-Campus-Management/Smart-Campus-Management
 
-    # Install dependencies
+    # Restore dependencies
     dotnet restore
 
-    # Update the database connection string in appsettings.json
-    # Then, apply migrations to set up the database
+    # Update the connection string in `appsettings.json`
+    # Apply database migrations
     dotnet ef database update
 
-    # Run the backend server
+    # Run the server
     dotnet run
     ```
 
@@ -69,9 +80,8 @@ A full-stack web application designed to streamline college and school operation
     # Install dependencies
     npm install
 
-    # Update the backend API URL in src/environments/environment.ts
-    # Then, run the frontend application
-    ng serve
+    # Run the development server
+    npm run dev
     ```
 
 ---
@@ -80,20 +90,8 @@ A full-stack web application designed to streamline college and school operation
 
 Contributions are welcome! Please feel free to fork the repository, create a feature branch, and open a pull request.
 
-1.  Fork the repository.
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
-
 ---
 
 ## 📄 License
 
 This project is licensed under the MIT License.
-
----
-
-## 📧 Contact
-
-For questions or feedback, please reach out via email or open an issue on GitHub.

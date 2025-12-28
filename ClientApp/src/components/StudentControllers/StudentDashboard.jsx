@@ -19,7 +19,7 @@ export default function StudentDashboard() {
       <Sidebar title="Student Panel" menuItems={menuItems} />
       <main className="main-content">
         <div className="topbar">
-          <h2>Dashboard</h2>
+          <h4>Dashboard</h4>
           <div className="user-menu">
             <span className="name">{user?.firstName} {user?.lastName}</span>
           </div>

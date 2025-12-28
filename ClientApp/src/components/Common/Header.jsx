@@ -11,7 +11,7 @@ export default function FacultyTopbar({ title, user }) {
 
   return (
     <div className="topbar">
-      <h2>{title}</h2>
+      <h4>{title}</h4>
 
       <div className="user-menu">
         <img src={avatarUrl} alt="User" />

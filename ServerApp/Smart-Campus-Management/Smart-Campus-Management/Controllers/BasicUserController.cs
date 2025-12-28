@@ -33,7 +33,6 @@ namespace Smart_Campus_Management.Controllers
                 FirstName = user.FirstName,
                 MiddleName = user.MiddleName,
                 LastName = user.LastName,
-                RollNo = user.RollNo,
                 Email = user.Email,
                 CreatedAt = user.CreatedAt,
                 Role = user.Role,
@@ -216,7 +215,7 @@ namespace Smart_Campus_Management.Controllers
         /// Uploads an Excel file to add Students or Faculty in bulk (Admin only).
         /// </summary>
         /// <remarks>
-        /// Requires admin authorization. Upload an Excel file with columns: Name, Email, RollNo (for Students), EmployeeId (for Faculty), Role, DepartmentId.
+        /// Requires admin authorization. Upload an Excel file with columns: Name, Email (for Students), EmployeeId (for Faculty), Role, DepartmentId.
         /// Sample request:
         /// - Content-Type: multipart/form-data
         /// - File: [Excel file]

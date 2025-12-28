@@ -100,6 +100,7 @@ const initialState = {
     isLoading: false,
     needsRegistration: false,
     message: "",
+    isCollapsed: false
 };
 
 export const authSlice = createSlice({
@@ -112,6 +113,9 @@ export const authSlice = createSlice({
             state.isError = false;
             state.needsRegistration = false;
             state.message = "";
+        },
+        setIsCollapsed: (state, action) => {
+            state.isCollapsed = action.payload;
         },
         setUser: (state, action) => {
             state.user = action.payload;
@@ -163,5 +167,5 @@ export const authSlice = createSlice({
     },
 });
 
-export const { reset, setUser } = authSlice.actions;
+export const { reset, setUser, setIsCollapsed } = authSlice.actions;
 export default authSlice.reducer;

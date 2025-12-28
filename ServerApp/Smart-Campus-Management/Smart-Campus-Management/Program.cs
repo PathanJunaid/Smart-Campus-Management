@@ -96,6 +96,7 @@ builder.Services.AddScoped<ILogServices, LogServices>();
 builder.Services.AddScoped<IDepartmentServices, DepartmentServices>();
 builder.Services.AddScoped<IFacultyServices, FacultyServices>();
 builder.Services.AddScoped<IEnrollmentServices, EnrollmentServices>();
+builder.Services.AddScoped<IProfessorEnrollmentServices, ProfessorEnrollmentServices>();
 
 // Add Swagger with Bearer Support
 builder.Services.AddEndpointsApiExplorer();

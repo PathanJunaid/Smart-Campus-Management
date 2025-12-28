@@ -13,6 +13,8 @@ namespace Smart_Campus_Management.DTO
 
         [Required(ErrorMessage = "FacultyId is required.")]
         public int FacultyId { get; set; }
+        public int AcademicYear { get; set; }
+
     }
     public class UpdateDepartmentDTO
     {

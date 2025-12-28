@@ -52,6 +52,21 @@ namespace Smart_Campus_Management.Controllers
             }
         }
 
+        [HttpGet("enrolled-users")]
+        [Authorize]
+        public async Task<IActionResult> GetEnrolledUsers([FromQuery] GetEnrolledUsersFilterDto filter)
+        {
+            try
+            {
+                var users = await _departmentServices.GetEnrolledUsers(filter);
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Failed to fetch enrolled users", error = ex.Message });
+            }
+        }
+
         [HttpGet("{id}")]
         [Authorize] // Any authenticated role can access
         public async Task<IActionResult> GetDepartmentById(int id)
