@@ -1,11 +1,16 @@
-import React from 'react'
+import React from "react";
+import { useSelector } from "react-redux";
 
 const Footer = () => {
-  return (
-    <div className='footer'>
-      <pre>This is Website</pre>
-    </div>
-  )
-}
+  const isCollapsed = useSelector(
+    (state) => state.auth.isCollapsed
+  );
 
-export default Footer
+  return (
+    <div className={`footer website-footer ${isCollapsed ? "collapsed" : "expanded"}`}>
+      <span>This is Website</span>
+    </div>
+  );
+};
+
+export default Footer;

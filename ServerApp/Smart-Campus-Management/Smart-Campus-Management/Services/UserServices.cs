@@ -1,14 +1,15 @@
-﻿using System.Security.Claims;
-using System.Text;
-using Smart_Campus_Management.Interface;
-using Smart_Campus_Management.Models;
-using Smart_Campus_Management.DTO;
-using System.IdentityModel.Tokens.Jwt;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OfficeOpenXml;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
+using Smart_Campus_Management.DTO;
 using Smart_Campus_Management.Helpers;
+using Smart_Campus_Management.Interface;
+using Smart_Campus_Management.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 
 namespace Smart_Campus_Management.Services
 {
@@ -19,14 +20,16 @@ namespace Smart_Campus_Management.Services
         private readonly IEmailService _emailService;
         private readonly ILogServices _logServices;
         private readonly IEnrollmentServices _enrollmentServices;
+        private readonly IProfessorEnrollmentServices _professorEnrollmentServices;
 
-        public UserServices(AppDbContext dbcontext, IConfiguration config, IEmailService emailService, ILogServices logServices, IEnrollmentServices enrollmentServices)
+        public UserServices(AppDbContext dbcontext, IConfiguration config, IEmailService emailService, ILogServices logServices, IEnrollmentServices enrollmentServices, IProfessorEnrollmentServices professorEnrollmentServices)
         {
             this.dbcontext = dbcontext;
             this._Config = config;
             _emailService = emailService;
             _logServices = logServices;
             _enrollmentServices = enrollmentServices;
+            _professorEnrollmentServices = professorEnrollmentServices;
         }
 
         public async Task<UploadResponseDTO> UploadStudentOrFaculty(UploadStudentorFacultyDTO UploadedData)
@@ -48,12 +51,8 @@ namespace Smart_Campus_Management.Services
                     "MiddleName",
                     "LastName",
                     "Email",
-                    "RollNo",
                     "MobileNumber",
-                    "DOB",
-                    "Role",
-                    "Department",
-                    "EmployeeId"
+                    "DOB"
                 };
 
                 // Validate role
@@ -149,57 +148,11 @@ namespace Smart_Campus_Management.Services
                                     case "email":
                                         user.Email = cellValue.ToLower();
                                         break;
-                                    case "rollno":
-                                        if (rawValue != null)
-                                        {
-                                            // Handle numeric or text values
-                                            string rollNoStr = rawValue switch
-                                            {
-                                                double num => num.ToString("F0"), // Convert number to string without scientific notation
-                                                string str => str,
-                                                _ => rawValue.ToString()
-                                            };
-                                            if (long.TryParse(rollNoStr, out long rollNo) && user.Role == UserRole.Student)
-                                            {
-                                                user.RollNo = rollNo;
-                                            }
-                                            else
-                                            {
-                                                user.RollNo = null;
-                                                var error = $"Row {row}: Invalid RollNo format ({rollNoStr}).";
-                                                await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user));
-                                                response.Errors.Add(error);
-                                            }
-                                        }
-                                        else
-                                        {
-                                            user.RollNo = null;
-                                        }
-                                        break;
                                     case "mobilenumber":
                                         user.MobileNumber = long.TryParse(cellValue, out long mobile) ? mobile : null;
                                         break;
                                     case "dob":
                                         user.DOB = DateOnly.TryParse(cellValue, out DateOnly dob) ? dob : null;
-                                        break;
-                                    case "role":
-                                        if (Enum.TryParse<UserRole>(cellValue, true, out var role))
-                                        {
-                                            user.Role = role;
-                                        }
-                                        break;
-                                    case "employeeid":
-                                        if (int.TryParse(cellValue, out int employeeId) && user.Role == UserRole.Professor)
-                                        {
-                                            user.EmployeeId = employeeId;
-                                        }
-                                        else
-                                        {
-                                            user.EmployeeId = null;
-                                            var error = $"Row {row}: Invalid EmployeeId format ({cellValue}).";
-                                            await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user));
-                                            response.Errors.Add(error);
-                                        }
                                         break;
                                 }
                             }
@@ -223,37 +176,38 @@ namespace Smart_Campus_Management.Services
                             }
 
                             // Check for duplicate email
-                            if (await dbcontext.Users.AnyAsync(u => u.Email == user.Email))
+                            if (await dbcontext.Users.AnyAsync(u => u.Email == user.Email) && user.Role != UserRole.Student)
                             {
                                 var error = $"Row {row}: Email {user.Email} already exists.";
                                 await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user));
                                 response.Errors.Add(error);
                                 continue;
                             }
-
-                            // Check for duplicate RollNo (if provided)
-                            if (user.RollNo.HasValue && await dbcontext.Users.AnyAsync(u => u.RollNo == user.RollNo))
+                            if(user.Role == UserRole.Student)
                             {
-                                var error = $"Row {row}: RollNo {user.RollNo} already exists.";
-                                await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user.Email));
-                                response.Errors.Add(error);
-                                continue;
-                            }
+                                if(await _enrollmentServices.AlreadyEnrolled(user.Email, DateTime.Now, (int)UploadedData.DepartmentId))
+                                {
+                                    var error = $"Row {row}: Email {user.Email} already Enrolled.";
+                                    await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user));
+                                    response.Errors.Add(error);
+                                    continue;
+                                }
 
-                            // Check for duplicate EmployeeId (if provided)
-                            if (user.EmployeeId.HasValue && await dbcontext.Users.AnyAsync(u => u.EmployeeId == user.EmployeeId))
-                            {
-                                var error = $"Row {row}: EmployeeId {user.EmployeeId} already exists.";
-                                await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user.Email));
-                                response.Errors.Add(error);
-                                continue;
                             }
 
                             // Attempt to add user
                             using var transaction = await dbcontext.Database.BeginTransactionAsync();
                             try
                             {
-                                await dbcontext.Users.AddAsync(user);
+                                if(!await dbcontext.Users.AnyAsync(u => u.Email == user.Email))
+                                {
+                                    await dbcontext.Users.AddAsync(user);
+                                }
+                                else
+                                {
+                                    var userId = await dbcontext.Users.Where(u => u.Email == user.Email && u.Active).Select(u => u.Id).FirstOrDefaultAsync();
+                                    user.Id = userId;
+                                }
                                 await dbcontext.SaveChangesAsync();
                                 if (UploadedData.DepartmentId != null && UploadedData.Role == UserRole.Student)
                                 {
@@ -261,11 +215,27 @@ namespace Smart_Campus_Management.Services
                                     {
                                         DepartmentId = (int)UploadedData.DepartmentId,
                                         StudentId = user.Id,
+                                        EffectiveFrom = UploadedData.EffectiveFrom ?? DateTime.UtcNow // Use provided date or default
                                     };
                                     var result = await _enrollmentServices.AddEnrollment(addEnrollmentDTO);
                                     if (!result.Success)
                                     {
                                         throw new Exception(result.Message);
+                                    }
+                                }
+                                else if(UploadedData.Role == UserRole.Professor)
+                                {
+                                    AddProfessorEnrollmentDTO enrollmentData = new AddProfessorEnrollmentDTO
+                                    {
+                                        UserId = user.Id,
+                                        DepartmentId = (int)UploadedData.DepartmentId
+                                    };
+                                    var enrollment = await _professorEnrollmentServices.AddEnrollment(enrollmentData);
+                                    if (!enrollment.Success)
+                                    {
+                                        var error = $"Row {row}: Email {user.Email} failed to Enroll.";
+                                        await _logServices.LogToDatabase("UserImport", "Failure", error, JsonSerializer.Serialize(user));
+                                        response.Errors.Add(error);
                                     }
                                 }
                                 await transaction.CommitAsync();
@@ -779,7 +749,6 @@ namespace Smart_Campus_Management.Services
                 new Claim(JwtRegisteredClaimNames.Email, TokenData.Email),
                 new Claim(ClaimTypes.Role, TokenData.Role.ToString()),
                 new Claim("userId", TokenData.Id.ToString()),
-                new Claim ("RollNo", TokenData.RollNo.ToString()),
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_Config["Jwt:JWTSECRET"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -820,12 +789,6 @@ namespace Smart_Campus_Management.Services
                     response.Message = "User with this email already exists.";
                     return response;
                 }
-                if (userDto.Role == UserRole.Student && !userDto.RollNo.HasValue)
-                {
-                    response.Success = false;
-                    response.Message = "Student Must have a Roll No.";
-                    return response;
-                }
 
                 var user = new User
                 {
@@ -838,7 +801,6 @@ namespace Smart_Campus_Management.Services
                     Password = null,
                     Active = true,
                     MobileNumber = userDto.MobileNumber,
-                    RollNo = userDto.RollNo,
                     DOB = userDto.DOB,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow

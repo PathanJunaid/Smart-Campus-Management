@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { logoutUser } from "../../store/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { logoutUser, setIsCollapsed } from "../../store/authSlice";
 
 // Simple SVG Icons
 const Icons = {
@@ -20,7 +20,9 @@ export default function Sidebar({ title, menuItems }) {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const isCollapsed = useSelector(
+        (state) => state.auth.isCollapsed
+    );
 
     const handleLogout = () => {
         dispatch(logoutUser());
@@ -35,7 +37,7 @@ export default function Sidebar({ title, menuItems }) {
     };
 
     const toggleSidebar = () => {
-        setIsCollapsed(!isCollapsed);
+        dispatch(setIsCollapsed(!isCollapsed));
     };
 
     return (

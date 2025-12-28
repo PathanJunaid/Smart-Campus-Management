@@ -38,5 +38,62 @@ namespace Smart_Campus_Management.Controllers
                 return StatusCode(500, new { message = "Failed to enroll users.", error = ex.Message });
             }
         }
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetEnrollments([FromQuery] GetEnrolledUsersFilterDto filter)
+        {
+            var response = await _enrollmentServices.GetEnrollments(filter);
+            if (!response.Success)
+                return BadRequest(response);
+            
+            return Ok(response);
+        }
+
+        [HttpGet("unenrolled-students")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetUnenrolledStudents()
+        {
+            var response = await _enrollmentServices.GetUnenrolledStudents();
+            if (!response.Success)
+                return BadRequest(response);
+            
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateEnrollment([FromBody] UpdateEnrollmentDTO request)
+        {
+            var response = await _enrollmentServices.UpdateEnrollment(request);
+            if (!response.Success)
+                return BadRequest(response);
+            
+            return Ok(response);
+        }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteEnrollment(int id)
+        {
+            var response = await _enrollmentServices.DeleteEnrollment(id);
+            if (!response.Success)
+                return BadRequest(response);
+            
+            return Ok(response);
+        }
+        
+        [HttpPost("add")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AddEnrollment([FromBody] AddEnrollmentDTO request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var response = await _enrollmentServices.AddEnrollment(request);
+            if (!response.Success)
+                return BadRequest(response);
+
+            return Ok(response);
+        }
     }
 }

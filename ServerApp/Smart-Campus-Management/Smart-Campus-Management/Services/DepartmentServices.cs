@@ -136,5 +136,121 @@ namespace Smart_Campus_Management.Services
                 return false;
             }
         }
+        public async Task<List<EnrolledUserResponseDto>> GetEnrolledUsers(GetEnrolledUsersFilterDto filter)
+        {
+            try
+            {
+                var allUsers = new List<EnrolledUserResponseDto>();
+
+                // 1. Fetch Students
+                if (!filter.Role.HasValue || filter.Role == UserRole.Student)
+                {
+                    var studentQuery = _context.Enrollments
+                        .Include(e => e.Student)
+                        .Include(e => e.Departments)
+                        .AsNoTracking()
+                        .AsQueryable();
+
+                    if (!string.IsNullOrEmpty(filter.Search))
+                    {
+                        string search = filter.Search.ToLower();
+                        studentQuery = studentQuery.Where(e =>
+                            (e.Student.FirstName != null && e.Student.FirstName.ToLower().Contains(search)) ||
+                            (e.Student.LastName != null && e.Student.LastName.ToLower().Contains(search)) ||
+                            (e.Student.Email != null && e.Student.Email.ToLower().Contains(search))
+                        );
+                    }
+
+                    if (filter.EnrollmentYear.HasValue)
+                    {
+                        studentQuery = studentQuery.Where(e => e.EffectiveFrom.Year == filter.EnrollmentYear.Value);
+                    }
+
+                    var students = await studentQuery.Select(e => new EnrolledUserResponseDto
+                    {
+                        EnrollmentId = e.Id,
+                        UserId = e.StudentId,
+                        User = new UserResponseDTO
+                        {
+                            Id = e.Student.Id,
+                            FirstName = e.Student.FirstName,
+                            MiddleName = e.Student.MiddleName,
+                            LastName = e.Student.LastName ?? string.Empty,
+                            Email = e.Student.Email,
+                            Role = e.Student.Role,
+                            RollNo = e.Student.RollNo,
+                            MobileNumber = e.Student.MobileNumber,
+                            DOB = e.Student.DOB,
+                            ProfilePicture = e.Student.ProfilePicture,
+                            Active = e.Student.Active,
+                            CreatedAt = e.Student.CreatedAt,
+                            DepartmentId = e.DepartmentId,
+                            FacultyId = e.Departments.FacultyId
+                        }
+                    }).ToListAsync();
+
+                    allUsers.AddRange(students);
+                }
+
+                // 2. Fetch Professors
+                if (!filter.Role.HasValue || filter.Role == UserRole.Professor)
+                {
+                    var profQuery = _context.ProfessorEnrollments
+                        .Include(e => e.User)
+                        .Include(e => e.Department)
+                        .AsNoTracking()
+                        .AsQueryable();
+
+                    if (!string.IsNullOrEmpty(filter.Search))
+                    {
+                        string search = filter.Search.ToLower();
+                        profQuery = profQuery.Where(e =>
+                            (e.User.FirstName != null && e.User.FirstName.ToLower().Contains(search)) ||
+                            (e.User.LastName != null && e.User.LastName.ToLower().Contains(search)) ||
+                            (e.User.Email != null && e.User.Email.ToLower().Contains(search))
+                        );
+                    }
+
+                    if (filter.EnrollmentYear.HasValue)
+                    {
+                        profQuery = profQuery.Where(e => e.AssignedAt.Year == filter.EnrollmentYear.Value);
+                    }
+
+                    var professors = await profQuery.Select(e => new EnrolledUserResponseDto
+                    {
+                        EnrollmentId = e.Id,
+                        UserId = e.UserId,
+                        User = new UserResponseDTO
+                        {
+                            Id = e.User.Id,
+                            FirstName = e.User.FirstName,
+                            MiddleName = e.User.MiddleName,
+                            LastName = e.User.LastName ?? string.Empty,
+                            Email = e.User.Email,
+                            Role = e.User.Role,
+                            RollNo = e.User.RollNo,
+                            MobileNumber = e.User.MobileNumber,
+                            DOB = e.User.DOB,
+                            ProfilePicture = e.User.ProfilePicture,
+                            Active = e.User.Active,
+                            CreatedAt = e.User.CreatedAt,
+                            DepartmentId = e.DepartmentId,
+                            FacultyId = e.Department.FacultyId
+                        }
+                    }).ToListAsync();
+
+                    allUsers.AddRange(professors);
+                }
+
+                await _logServices.LogToDatabase("GetEnrolledUsers", "Success", $"Fetched {allUsers.Count} users", JsonSerializer.Serialize(filter));
+
+                return allUsers;
+            }
+            catch (Exception ex)
+            {
+                await _logServices.LogToDatabase("GetEnrolledUsers", "Error", ex.Message, JsonSerializer.Serialize(filter));
+                return new List<EnrolledUserResponseDto>();
+            }
+        }
     }
 }

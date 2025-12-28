@@ -32,6 +32,8 @@
   --radius-full: 9999px;
   --sidebar-width: 260px;
   --sidebar-collapsed-width: 80px;
+  --footer-width: calc(100vw - 260px);
+  --footer-collapsed-width: calc(100vw - 80px);
 }
 
 * {
@@ -51,7 +53,6 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ==================== LAYOUT UTILITIES ==================== */
 .dashboard-container {
   display: flex;
   height: 100vh;
@@ -60,7 +61,6 @@ body {
 
 .main-content {
   flex: 1;
-  /* padding: 0px 10px 10px 10px; */
   overflow-y: auto;
   background: var(--bg-body);
   transition: margin-left 0.3s ease;
@@ -250,6 +250,14 @@ h6 {
 
 .sidebar.collapsed {
   width: var(--sidebar-collapsed-width);
+}
+
+.website-footer.expanded {
+  width: var(--footer-width);
+}
+
+.website-footer.collapsed {
+  width: var(--footer-collapsed-width);
 }
 
 .sidebar-header {
@@ -1158,7 +1166,7 @@ table thead tr th:last-child {
 }
 
 .website-footer {
-  position: sticky;
+  position: fixed;
   bottom: 0;
   width: 100%;
   background: var(--accent);

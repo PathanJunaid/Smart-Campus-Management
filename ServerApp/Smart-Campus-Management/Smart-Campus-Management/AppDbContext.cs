@@ -14,6 +14,7 @@ namespace Smart_Campus_Management
         public DbSet<Faculty_Model> Faculty { get; set; }
         public DbSet<Enrollment_Model> Enrollments { get; set; }
         public DbSet<EmailChangeLog> EmailChangeLogs { get; set; }
+        public DbSet<ProfessorEnrollmentModal> ProfessorEnrollments { get; set; }
 
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
@@ -40,12 +41,6 @@ namespace Smart_Campus_Management
                 .HasOne(e => e.Departments)
                 .WithMany(d => d.Enrollments)
                 .HasForeignKey(e => e.DepartmentId);
-
-            // User -> Many Enrollments
-            modelBuilder.Entity<Enrollment_Model>()
-                .HasOne(e => e.User)
-                .WithMany(u => u.Enrollments)
-                .HasForeignKey(e => e.StudentId);
         }
     }
 }

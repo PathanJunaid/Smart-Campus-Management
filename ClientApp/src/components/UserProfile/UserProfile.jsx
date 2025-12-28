@@ -5,7 +5,7 @@ import userService from '../../services/userService';
 import { setUser } from '../../store/authSlice';
 import { toast } from 'react-toastify';
 
-const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser, mode = 'edit' }) => {
+const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser, mode = 'edit', isModal = false, onClose }) => {
     const { id } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -38,7 +38,8 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser, mode = 'e
 
     // -- Navigation Helper --
     const goBack = () => {
-        if (onCancel) onCancel();
+        if (onClose) onClose();
+        else if (onCancel) onCancel();
         else navigate("/dashboard/users");
     };
 
@@ -232,6 +233,19 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser, mode = 'e
     };
 
     if (isLoading) {
+        if (isModal) {
+            return (
+                <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,0.5)" }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-body text-center p-5">
+                                <div className="spinner-border text-primary"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )
+        }
         return (
             <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '300px' }}>
                 <div className="spinner-border text-primary"></div>
@@ -244,152 +258,188 @@ const UserProfile = ({ userId, initialData, onCancel, isFromAdminUser, mode = 'e
     // Disabled if edit mode AND not editing
     const isEmailDisabled = mode === 'edit' && !isEmailEditing;
 
+    const formContent = (
+        <div className="row g-3">
+            {/* Names... (Same as before) */}
+            <div className="col-md-6">
+                <label className="form-label fw-bold small text-muted">First Name <span className="text-danger">*</span></label>
+                <input
+                    type="text"
+                    name="firstName"
+                    className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    placeholder="Only alphabets"
+                    style={{ height: '46px' }}
+                />
+                {errors.firstName && <div className="text-danger small mt-1">{errors.firstName}</div>}
+            </div>
+
+            <div className="col-md-6">
+                <label className="form-label fw-bold small text-muted">Middle Name</label>
+                <input
+                    type="text"
+                    name="middleName"
+                    className={`form-control ${errors.middleName ? 'is-invalid' : ''}`}
+                    value={formData.middleName}
+                    onChange={handleChange}
+                    placeholder="Optional"
+                    style={{ height: '46px' }}
+                />
+                {errors.middleName && <div className="text-danger small mt-1">{errors.middleName}</div>}
+            </div>
+
+            <div className="col-md-6">
+                <label className="form-label fw-bold small text-muted">Last Name <span className="text-danger">*</span></label>
+                <input
+                    type="text"
+                    name="lastName"
+                    className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    placeholder="Only alphabets"
+                    style={{ height: '46px' }}
+                />
+                {errors.lastName && <div className="text-danger small mt-1">{errors.lastName}</div>}
+            </div>
+
+            <div className="col-md-6">
+                <label className="form-label fw-bold small text-muted">Role</label>
+                {isFromAdminUser ? (
+                    <select
+                        name="role"
+                        className="form-select"
+                        value={formData.role}
+                        onChange={handleChange}
+                        style={{ height: '46px' }}
+                    >
+                        <option value={0}>Admin</option>
+                        <option value={1}>Professor</option>
+                        <option value={2}>Student</option>
+                    </select>
+                ) : (
+                    <input
+                        type="text"
+                        className="form-control bg-light"
+                        value={formData.role === 0 ? "Admin" : formData.role === 1 ? "Professor" : "Student"}
+                        disabled
+                        style={{ height: '46px' }}
+                    />
+                )}
+            </div>
+
+            {/* Email - Full Width with Edit Action */}
+            <div className="col-12">
+                <label className="form-label fw-bold small text-muted">Email Address <span className="text-danger">*</span></label>
+                <div className="input-group">
+                    <input
+                        type="email"
+                        name="email"
+                        className={`form-control ${errors.email ? 'is-invalid' : ''} ${isEmailDisabled ? 'bg-light' : ''}`}
+                        value={currentEmailValue} // Uses editableEmail in edit mode
+                        onChange={handleChange}
+                        placeholder="user@example.com"
+                        style={{ height: '46px' }}
+                        disabled={isEmailDisabled}
+                    />
+                    {canChangeEmail && (
+                        <button
+                            className="btn btn-outline-secondary"
+                            type="button"
+                            onClick={isEmailEditing ? handleCancelEmailEdit : handleStartEmailEdit}
+                            style={{ zIndex: 0 }}
+                        >
+                            {isEmailEditing ? 'Cancel Change' : 'Change Email'}
+                        </button>
+                    )}
+                </div>
+                {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
+            </div>
+
+            {/* Mobile & DOB (Same as before) */}
+            <div className="col-12">
+                <label className="form-label fw-bold small text-muted">Mobile Number <span className="text-danger">*</span></label>
+                <input
+                    type="number"
+                    name="mobileNumber"
+                    className={`form-control ${errors.mobileNumber ? 'is-invalid' : ''}`}
+                    value={formData.mobileNumber}
+                    onChange={handleChange}
+                    placeholder="10 Digits"
+                    style={{ height: '46px' }}
+                />
+                {errors.mobileNumber && <div className="text-danger small mt-1">{errors.mobileNumber}</div>}
+            </div>
+
+            <div className="col-12">
+                <label className="form-label fw-bold small text-muted">Date of Birth <span className="text-danger">*</span></label>
+                <input
+                    type="date"
+                    name="dob"
+                    className={`form-control ${errors.dob ? 'is-invalid' : ''}`}
+                    value={formData.dob}
+                    onChange={handleChange}
+                    style={{ height: '46px' }}
+                />
+                {errors.dob && <div className="text-danger small mt-1">{errors.dob}</div>}
+            </div>
+        </div>
+    );
+
+    const formFooter = (
+        <div className="d-flex justify-content-end gap-3">
+            <button type="button" className="btn btn-light px-4" onClick={goBack} style={{ borderRadius: '8px' }}>
+                Cancel
+            </button>
+
+            <button type="button" className="btn btn-primary px-4" onClick={handleSubmit} disabled={isSaving || Object.values(errors).some(x => x)} style={{ borderRadius: '8px', minWidth: '120px' }}>
+                {isSaving ? "Processing..." : (mode === 'add' ? "Add User" : "Update User")}
+            </button>
+        </div>
+    );
+
+    if (isModal) {
+        return (
+            <div className="modal fade show d-block" tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
+                <div className="modal-dialog modal-lg modal-dialog-centered">
+                    <div className="modal-content">
+
+                        <div className="modal-header">
+                            <h5 className="modal-title">{mode === 'add' ? 'Add New User' : 'Edit User Profile'}</h5>
+                            <button type="button" className="btn-close" onClick={goBack}></button>
+                        </div>
+
+                        <div className="modal-body" style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+                            <form noValidate>
+                                {formContent}
+                            </form>
+                        </div>
+
+                        <div className="modal-footer">
+                            {formFooter}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="page-box">
             <div className="card-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
                 <div className="card-header border-bottom mb-4 pb-3">
                     <h4 className="card-title m-0">{mode === 'add' ? 'Add New User' : 'Edit User Profile'}</h4>
                 </div>
-
                 <form onSubmit={handleSubmit} noValidate>
-                    <div className="row g-3">
-                        {/* Names... (Same as before) */}
-                        <div className="col-md-6">
-                            <label className="form-label fw-bold small text-muted">First Name <span className="text-danger">*</span></label>
-                            <input
-                                type="text"
-                                name="firstName"
-                                className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                placeholder="Only alphabets"
-                                style={{ height: '46px' }}
-                            />
-                            {errors.firstName && <div className="text-danger small mt-1">{errors.firstName}</div>}
-                        </div>
-
-                        <div className="col-md-6">
-                            <label className="form-label fw-bold small text-muted">Middle Name</label>
-                            <input
-                                type="text"
-                                name="middleName"
-                                className={`form-control ${errors.middleName ? 'is-invalid' : ''}`}
-                                value={formData.middleName}
-                                onChange={handleChange}
-                                placeholder="Optional"
-                                style={{ height: '46px' }}
-                            />
-                            {errors.middleName && <div className="text-danger small mt-1">{errors.middleName}</div>}
-                        </div>
-
-                        <div className="col-md-6">
-                            <label className="form-label fw-bold small text-muted">Last Name <span className="text-danger">*</span></label>
-                            <input
-                                type="text"
-                                name="lastName"
-                                className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                placeholder="Only alphabets"
-                                style={{ height: '46px' }}
-                            />
-                            {errors.lastName && <div className="text-danger small mt-1">{errors.lastName}</div>}
-                        </div>
-
-                        <div className="col-md-6">
-                            <label className="form-label fw-bold small text-muted">Role</label>
-                            {isFromAdminUser ? (
-                                <select
-                                    name="role"
-                                    className="form-select"
-                                    value={formData.role}
-                                    onChange={handleChange}
-                                    style={{ height: '46px' }}
-                                >
-                                    <option value={0}>Admin</option>
-                                    <option value={1}>Professor</option>
-                                    <option value={2}>Student</option>
-                                </select>
-                            ) : (
-                                <input
-                                    type="text"
-                                    className="form-control bg-light"
-                                    value={formData.role === 0 ? "Admin" : formData.role === 1 ? "Professor" : "Student"}
-                                    disabled
-                                    style={{ height: '46px' }}
-                                />
-                            )}
-                        </div>
-
-                        {/* Email - Full Width with Edit Action */}
-                        <div className="col-12">
-                            <label className="form-label fw-bold small text-muted">Email Address <span className="text-danger">*</span></label>
-                            <div className="input-group">
-                                <input
-                                    type="email"
-                                    name="email"
-                                    className={`form-control ${errors.email ? 'is-invalid' : ''} ${isEmailDisabled ? 'bg-light' : ''}`}
-                                    value={currentEmailValue} // Uses editableEmail in edit mode
-                                    onChange={handleChange}
-                                    placeholder="user@example.com"
-                                    style={{ height: '46px' }}
-                                    disabled={isEmailDisabled}
-                                />
-                                {canChangeEmail && (
-                                    <button
-                                        className="btn btn-outline-secondary"
-                                        type="button"
-                                        onClick={isEmailEditing ? handleCancelEmailEdit : handleStartEmailEdit}
-                                        style={{ zIndex: 0 }}
-                                    >
-                                        {isEmailEditing ? 'Cancel Change' : 'Change Email'}
-                                    </button>
-                                )}
-                            </div>
-                            {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
-                        </div>
-
-                        {/* Mobile & DOB (Same as before) */}
-                        <div className="col-12">
-                            <label className="form-label fw-bold small text-muted">Mobile Number <span className="text-danger">*</span></label>
-                            <input
-                                type="number"
-                                name="mobileNumber"
-                                className={`form-control ${errors.mobileNumber ? 'is-invalid' : ''}`}
-                                value={formData.mobileNumber}
-                                onChange={handleChange}
-                                placeholder="10 Digits"
-                                style={{ height: '46px' }}
-                            />
-                            {errors.mobileNumber && <div className="text-danger small mt-1">{errors.mobileNumber}</div>}
-                        </div>
-
-                        <div className="col-12">
-                            <label className="form-label fw-bold small text-muted">Date of Birth <span className="text-danger">*</span></label>
-                            <input
-                                type="date"
-                                name="dob"
-                                className={`form-control ${errors.dob ? 'is-invalid' : ''}`}
-                                value={formData.dob}
-                                onChange={handleChange}
-                                style={{ height: '46px' }}
-                            />
-                            {errors.dob && <div className="text-danger small mt-1">{errors.dob}</div>}
-                        </div>
-                    </div>
-
-                    <div className="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
-                        <button type="button" className="btn btn-light px-4" onClick={goBack} style={{ borderRadius: '8px' }}>
-                            Cancel
-                        </button>
-
-                        <button type="submit" className="btn btn-primary px-4" disabled={isSaving || Object.values(errors).some(x => x)} style={{ borderRadius: '8px', minWidth: '120px' }}>
-                            {isSaving ? "Processing..." : (mode === 'add' ? "Add User" : "Update User")}
-                        </button>
+                    {formContent}
+                    <div className="mt-5 pt-3 border-top">
+                        {formFooter}
                     </div>
                 </form>
             </div>
         </div>
     );
 };
+
 export default UserProfile;

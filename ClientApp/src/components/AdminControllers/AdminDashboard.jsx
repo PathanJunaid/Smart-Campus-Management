@@ -4,6 +4,7 @@ import Sidebar from "../Common/Sidebar";
 import FacultyTopbar from "../Common/Header"; // Reusing Topbar as requested
 import AdminUsers from "./AdminUsers";
 import AdminFaculty from "./AdminFaculty";
+import AdminEnrollment from "./AdminEnrollment";
 import { useSelector } from 'react-redux';
 
 import AdminProfile from "./AdminProfile";
@@ -23,6 +24,7 @@ export default function AdminDashboard() {
         if (pathname.includes("/dashboard/faculty")) return "Faculty";
         if (pathname.includes("/dashboard/department")) return "Department";
         if (pathname.includes("/dashboard/users")) return "Users";
+        if (pathname.includes("/dashboard/enrollment")) return "Student Enrollment";
         if (pathname.includes("/dashboard/profile")) return "Profile";
         return "Dashboard";
     };
@@ -34,6 +36,7 @@ export default function AdminDashboard() {
         { name: "Faculty", path: "/dashboard/faculty", icon: "Teachers" }, // Reusing Teachers icon
         { name: "Department", path: "/dashboard/department", icon: "Courses" }, // Reusing Courses icon as placeholder
         { name: "Users", path: "/dashboard/users", icon: "Students" }, // Reusing Students icon
+        { name: "Student Enrollment", path: "/dashboard/enrollment", icon: "Attendance" },
         { name: "Profile", path: "/dashboard/profile", icon: "Profile" },
     ];
 
@@ -49,8 +52,9 @@ export default function AdminDashboard() {
 
                     {/* Users Routes */}
                     <Route path="users/*" element={<AdminUsers />} />
-                    <Route path="users/add" element={<UserProfile mode="add" isFromAdminUser={true} />} />
-                    <Route path="users/edit/:id" element={<UserProfile mode="edit" isFromAdminUser={true} />} />
+
+                    {/* Enrollment Routes */}
+                    <Route path="enrollment/*" element={<AdminEnrollment />} />
 
                     <Route path="profile" element={<AdminProfile />} />
                     <Route path="profile/edit" element={<AdminProfile editMode={true} />} />

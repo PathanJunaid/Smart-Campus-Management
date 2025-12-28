@@ -10,5 +10,6 @@ namespace Smart_Campus_Management.Interface
         Task<Department_Model?> GetDepartmentById(int id);
         Task<Department_Model?> UpdateDepartment(int id, UpdateDepartmentDTO model);
         Task<bool> DeleteDepartment(int id);
+        Task<List<EnrolledUserResponseDto>> GetEnrolledUsers(GetEnrolledUsersFilterDto filter);
     }
 }
