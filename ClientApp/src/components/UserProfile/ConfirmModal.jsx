@@ -1,7 +1,7 @@
 import React from 'react'
 
-const ConfirmModal = ({user, onConfirm,onCancel }) => {
-    if (!user) return null;
+const ConfirmModal = ({name, topic,id, onConfirm,onCancel }) => {
+    // if (!user) return null;
 return (
     <div className="modal fade show d-block "  tabIndex="-1" style={{ background: "rgba(0,0,0,0.5)" }}>
       <div className="modal-dialog modal-dialog-centered">
@@ -15,7 +15,7 @@ return (
           <div className="modal-body">
             <p>
               Are you sure you want to delete{" "}
-              <strong>{user.firstName}</strong>?
+              <strong>{name}</strong> {topic}?
             </p>
           </div>
 
@@ -24,7 +24,7 @@ return (
               Cancel
             </button>
 
-            <button type="button" className="btn btn-danger" onClick={() => onConfirm(user)}>
+            <button type="button" className="btn btn-danger" onClick={() => onConfirm(id)}>
               Delete
             </button>
           </div>
